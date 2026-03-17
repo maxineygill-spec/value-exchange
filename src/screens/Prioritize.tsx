@@ -74,7 +74,7 @@ const Prioritize = ({ playerHand, playerTop2, setPlayerTop2, playerTop2Reason, s
         </label>
         <textarea
           className="w-full bg-muted border border-border rounded-xl p-4 text-foreground text-sm font-sans focus:ring-2 ring-primary/50 outline-none transition-all resize-none"
-          placeholder="What makes these feel most like you?"
+          placeholder="Why do these values matter the most to you?"
           rows={2}
           value={playerTop2Reason}
           onChange={(e) => setPlayerTop2Reason(e.target.value)}

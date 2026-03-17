@@ -83,7 +83,7 @@ const Want = ({ playerHand, playerTop2, deckSize, playerWants, setPlayerWants, p
           </label>
           <textarea
             className="w-full bg-muted border border-border rounded-xl p-4 text-foreground text-sm font-sans focus:ring-2 ring-primary/50 outline-none transition-all resize-none"
-            placeholder="What draws you to this one?"
+            placeholder="What draws you to these ones?"
             rows={3}
             value={playerWantReason}
             onChange={(e) => setPlayerWantReason(e.target.value)}
