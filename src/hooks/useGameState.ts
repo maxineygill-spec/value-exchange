@@ -130,13 +130,12 @@ export const useGameState = () => {
     const npc = npcProfile;
     let responseType: "accept" | "decline" | "counter" | "refuse";
 
-    // Check if player is asking for NPC's core value
+    // Check if player is asking for NPC's core value (NPC won't give it up)
     if (npc.coreValues.includes(wantedCardName) && npcTop2.includes(wantedCardName)) {
       responseType = "refuse";
-    } else if (npc.flexValues.includes(offeredCardName)) {
+    } else if (npc.flexValues.includes(offeredCardName) || npc.coreValues.includes(offeredCardName)) {
+      // NPC wants what the player is offering — accept!
       responseType = "accept";
-    } else if (npc.coreValues.includes(offeredCardName)) {
-      responseType = "refuse";
     } else if (round >= 2) {
       responseType = "counter";
     } else {
