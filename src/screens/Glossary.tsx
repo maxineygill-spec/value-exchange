@@ -21,8 +21,9 @@ const Glossary = ({ deckSize, onContinue }: GlossaryProps) => {
           The Values at Play
         </h1>
         <p className="text-muted-foreground font-sans">
-          You'll be working with these {deckSize} values today.
-          Take a moment to read through them.
+          We're playing a values card game — a reflective exercise where you'll be dealt random value cards,
+          pick the ones that matter most to you, and negotiate trades with a partner.
+          You'll be working with these {deckSize} values today. Take a moment to read through them.
         </p>
       </motion.div>
 

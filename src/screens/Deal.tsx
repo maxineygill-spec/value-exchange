@@ -32,7 +32,7 @@ const Deal = ({ playerHand, onContinue }: DealProps) => {
         transition={{ delay: playerHand.length * 0.08 + 0.3 }}
         className="text-muted-foreground text-center max-w-md mb-8 font-sans"
       >
-        These values have been randomly dealt to you. Take a moment to sit with them.
+        These values have been randomly dealt to you. Take a moment to look over them.
       </motion.p>
 
       <motion.button
