@@ -31,16 +31,16 @@ export const NPC_TYPES: NPCType[] = [
         "Interesting offer. {offeredCard} aligns with how I try to live. Deal.",
       ],
       declineHigh: [
-        "I appreciate the offer, but {offeredCard} is really central to who I am. Could you offer something else?",
-        "{offeredCard} isn't something I can easily part with. What else do you have?",
+        "I hear you, but {wantedCard} still means a lot to me. I'm not sure {offeredCard} is enough to let it go. Could you offer something else?",
+        "{offeredCard} is nice, but {wantedCard} is really important to how I live. What else do you have?",
       ],
       counterOffer: [
         "What if instead I offered you {counterCard}? I think that gets at what you're really looking for.",
-        "I won't trade {offeredCard}, but I could give you {counterCard}. Would that work?",
+        "I can't part with {wantedCard}, but I could give you {counterCard}. Would that work?",
       ],
       refuseCore: [
-        "{offeredCard} is non-negotiable for me. It's at the heart of everything I stand for.",
-        "I hear you, but {offeredCard} isn't on the table. Some things aren't tradeable.",
+        "{wantedCard} is non-negotiable for me. It's at the heart of everything I stand for.",
+        "I hear you, but {wantedCard} isn't on the table. Some things aren't tradeable.",
       ],
     },
   },
@@ -59,16 +59,16 @@ export const NPC_TYPES: NPCType[] = [
         "Practical choice. I'll take {offeredCard} — it fits what I'm trying to build.",
       ],
       declineHigh: [
-        "{offeredCard} is doing a lot of work for me right now. What else could you offer?",
-        "Not quite. {offeredCard} is too valuable to my goals. Think about what I need.",
+        "{wantedCard} is doing a lot of work for me right now. {offeredCard} doesn't quite make up for it. What else could you offer?",
+        "Not quite. {wantedCard} is too valuable to my goals. Think about what I need.",
       ],
       counterOffer: [
         "Let's be practical — {counterCard} gets you further than what you asked for anyway.",
         "Better deal: I give you {counterCard}. More useful, better fit. What do you say?",
       ],
       refuseCore: [
-        "{offeredCard} drives everything I do. I can't function without it.",
-        "That's a core asset for me. Not for trade at any price.",
+        "{wantedCard} drives everything I do. I can't function without it.",
+        "{wantedCard} is a core asset for me. Not for trade at any price.",
       ],
     },
   },
@@ -87,16 +87,16 @@ export const NPC_TYPES: NPCType[] = [
         "Honestly, knowing that {offeredCard} matters to you makes me feel good about this trade.",
       ],
       declineHigh: [
-        "{offeredCard} is really tied to how I care for people around me. It's hard to let go of. What else might work?",
-        "I'd feel a real loss giving up {offeredCard}. Can we find another way?",
+        "{wantedCard} is really tied to how I care for people around me. {offeredCard} is nice, but it's hard to let go of {wantedCard}. What else might work?",
+        "I'd feel a real loss giving up {wantedCard}. Can we find another way?",
       ],
       counterOffer: [
         "What if I gave you {counterCard} instead? I think it might actually mean more to you when you think about it.",
         "How about {counterCard}? I feel like that's what you're really reaching for.",
       ],
       refuseCore: [
-        "{offeredCard} is how I show up for people. I can't trade that away.",
-        "That one's too close to my heart. Some values are load-bearing.",
+        "{wantedCard} is how I show up for people. I can't trade that away.",
+        "{wantedCard} is too close to my heart. Some values are load-bearing.",
       ],
     },
   },
@@ -111,20 +111,20 @@ export const NPC_TYPES: NPCType[] = [
     negotiationStyle: "questioning",
     responses: {
       acceptLow: [
-        "Okay, I'll bite. {offeredCard} is interesting enough. But tell me — why are you so eager for mine?",
+        "Okay, I'll bite. {offeredCard} is interesting enough. But tell me — why are you so eager for {wantedCard}?",
         "Fine. {offeredCard} opens up possibilities I want to explore. Deal.",
       ],
       declineHigh: [
-        "Why would I give up {offeredCard}? That's what keeps me thinking clearly. Try again.",
-        "Hmm. {offeredCard} is how I stay honest with myself. Not sure I can trade that.",
+        "Why would I give up {wantedCard}? That's what keeps me thinking clearly. {offeredCard} isn't enough. Try again.",
+        "Hmm. {wantedCard} is how I stay honest with myself. Not sure I can trade that for {offeredCard}.",
       ],
       counterOffer: [
         "I'll ask you something first: why do you really want {wantedCard}? Maybe {counterCard} is what you actually need.",
         "Counter-proposal: {counterCard}. I think you're solving the wrong problem with your ask.",
       ],
       refuseCore: [
-        "Absolutely not. {offeredCard} is the whole point for me.",
-        "{offeredCard} is what makes me, me. That's not up for debate.",
+        "Absolutely not. {wantedCard} is the whole point for me.",
+        "{wantedCard} is what makes me, me. That's not up for debate.",
       ],
     },
   },
@@ -143,16 +143,16 @@ export const NPC_TYPES: NPCType[] = [
         "That's a fair exchange. {offeredCard} holds something important. I'll accept.",
       ],
       declineHigh: [
-        "I've held {offeredCard} for a reason. It protects something I care about deeply. I need more to let it go.",
-        "{offeredCard} is not lightly given. What are you offering that's worth protecting in return?",
+        "I've held {wantedCard} for a reason. It protects something I care about deeply. {offeredCard} isn't enough to let it go.",
+        "{wantedCard} is not lightly given. What are you offering that's worth protecting in return?",
       ],
       counterOffer: [
         "I'd rather offer {counterCard}. It's valuable and I think it serves both of us better.",
         "What if we traded differently — {counterCard} from me, and you keep what you have?",
       ],
       refuseCore: [
-        "{offeredCard} is sacred ground for me. I won't trade it.",
-        "Some things you don't trade. {offeredCard} is one of them for me.",
+        "{wantedCard} is sacred ground for me. I won't trade it.",
+        "Some things you don't trade. {wantedCard} is one of them for me.",
       ],
     },
   },
