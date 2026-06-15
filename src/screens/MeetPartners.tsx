@@ -1,0 +1,66 @@
+import { motion } from 'framer-motion';
+import { NPCType } from '../data/npcs';
+import { PartnerState } from '../lib/tradeEngine';
+import ValueCard from '../components/ValueCard';
+
+interface MeetPartnersProps {
+  partners: PartnerState[];
+  partnerProfiles: NPCType[];
+  onContinue: () => void;
+}
+
+const MeetPartners = ({ partners, partnerProfiles, onContinue }: MeetPartnersProps) => {
+  return (
+    <div className="min-h-screen flex flex-col items-center px-4 py-12">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-10 max-w-lg"
+      >
+        <h1 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-3">
+          Your Trading Partners
+        </h1>
+        <p className="text-muted-foreground font-sans">
+          The rest of the deck was dealt to these two. You'll trade with both — here's what each is holding.
+        </p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full mb-10">
+        {partners.map((p, i) => (
+          <motion.div
+            key={p.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 * i }}
+            className="bg-muted/40 border border-border rounded-2xl p-5"
+          >
+            <div className="text-center mb-4">
+              <div className="text-4xl mb-1">{partnerProfiles[i]?.avatar}</div>
+              <h2 className="text-xl font-serif font-bold text-foreground">{partnerProfiles[i]?.name}</h2>
+              <p className="text-muted-foreground text-sm font-sans">{partnerProfiles[i]?.description}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {p.hand.map((v, j) => (
+                <ValueCard key={v.name} value={v} size="sm" index={j} isPlayer={false} />
+              ))}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={onContinue}
+        className="px-8 py-4 bg-primary text-primary-foreground font-sans font-semibold rounded-xl"
+      >
+        Start trading →
+      </motion.button>
+    </div>
+  );
+};
+
+export default MeetPartners;
