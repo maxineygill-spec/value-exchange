@@ -36,10 +36,10 @@ const ModeSelect = ({ deckSize, setDeckSize, onStart }: ModeSelectProps) => {
           <div className="text-2xl mb-2">🃏</div>
           <h2 className="font-serif font-bold text-xl mb-2">Solo</h2>
           <p className="text-card-foreground/60 text-sm font-sans">
-            Play against an NPC partner
+            Explore your values.&nbsp;
           </p>
           <p className="text-card-foreground/40 text-xs font-sans mt-2">
-            Good for: exploring your values alone
+            
           </p>
         </motion.button>
 
