@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Value } from '../data/values';
-import { NPCType } from '../data/npcs';
+import { PartnerDisplay } from '../hooks/useGameState';
 import { DebriefAnswers, TradeRecord } from '../hooks/useGameState';
 
 interface SummaryProps {
@@ -8,7 +8,7 @@ interface SummaryProps {
   finalPlayerHand: Value[];
   finalTop: string[];
   topN: number;
-  partnerProfiles: NPCType[];
+  partnerProfiles: PartnerDisplay[];
   trades: TradeRecord[];
   debriefAnswers: DebriefAnswers;
   onExport: () => void;

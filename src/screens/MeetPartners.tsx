@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion';
-import { NPCType } from '../data/npcs';
 import { PartnerState } from '../lib/tradeEngine';
+import { PartnerDisplay } from '../hooks/useGameState';
 import ValueCard from '../components/ValueCard';
 
 interface MeetPartnersProps {
   partners: PartnerState[];
-  partnerProfiles: NPCType[];
+  partnerProfiles: PartnerDisplay[];
   onContinue: () => void;
 }
 
@@ -22,6 +22,7 @@ const MeetPartners = ({ partners, partnerProfiles, onContinue }: MeetPartnersPro
         </h1>
         <p className="text-muted-foreground font-sans">
           The rest of the deck was dealt to these two. You'll trade with both — here's what each is holding.
+          Each has their own private sense of what these values are worth to them; you'll learn it by trading.
         </p>
       </motion.div>
 
@@ -37,7 +38,6 @@ const MeetPartners = ({ partners, partnerProfiles, onContinue }: MeetPartnersPro
             <div className="text-center mb-4">
               <div className="text-4xl mb-1">{partnerProfiles[i]?.avatar}</div>
               <h2 className="text-xl font-serif font-bold text-foreground">{partnerProfiles[i]?.name}</h2>
-              <p className="text-muted-foreground text-sm font-sans">{partnerProfiles[i]?.description}</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {p.hand.map((v, j) => (

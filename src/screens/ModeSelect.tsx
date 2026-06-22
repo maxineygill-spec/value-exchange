@@ -19,67 +19,77 @@ const ModeSelect = ({ deckSize, setDeckSize, onStart }: ModeSelectProps) => {
           Value Cards
         </h1>
         <p className="text-muted-foreground text-lg font-sans">
-          What matters most to you?
+          A negotiation game about what matters
         </p>
       </motion.div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10 max-w-lg w-full">
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.5 }}
+          whileHover={{ y: -4 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onStart}
+          className="bg-card-player text-card-foreground rounded-2xl p-6 card-shadow text-left transition-shadow hover:card-shadow-hover"
+        >
+          <div className="text-2xl mb-2">🃏</div>
+          <h2 className="font-serif font-bold text-xl mb-2">Solo</h2>
+          <p className="text-card-foreground/60 text-sm font-sans">
+            Play against an NPC partner
+          </p>
+          <p className="text-card-foreground/40 text-xs font-sans mt-2">
+            Good for: exploring your values alone
+          </p>
+        </motion.button>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.5 }}
+          className="bg-muted rounded-2xl p-6 text-left opacity-50 cursor-not-allowed"
+        >
+          <div className="text-2xl mb-2">👥</div>
+          <h2 className="font-serif font-bold text-xl mb-2 text-foreground">With Someone</h2>
+          <p className="text-muted-foreground text-sm font-sans">
+            Share a code with a real person
+          </p>
+          <p className="text-muted-foreground/60 text-xs font-sans mt-2">
+            Multiplayer — coming soon
+          </p>
+        </motion.div>
+      </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15, duration: 0.5 }}
-        className="mb-10 max-w-lg w-full"
-      >
-        <p className="text-muted-foreground text-sm font-sans mb-4 text-center">
-          Choose your deck size
-        </p>
-        <div className="grid grid-cols-2 gap-6">
-          <motion.button
-            whileHover={{ y: -4 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setDeckSize(18)}
-            className={`rounded-2xl p-6 card-shadow text-left transition-all ${
-              deckSize === 18
-                ? 'bg-card-player text-card-foreground ring-2 ring-primary'
-                : 'bg-card-player/70 text-card-foreground hover:card-shadow-hover'
-            }`}
-          >
-            <div className="text-2xl mb-2">🃏</div>
-            <h2 className="font-serif font-bold text-xl mb-2">18 cards</h2>
-            <p className="text-card-foreground/60 text-sm font-sans">
-              A shorter, more focused round.
-            </p>
-          </motion.button>
-
-          <motion.button
-            whileHover={{ y: -4 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setDeckSize(24)}
-            className={`rounded-2xl p-6 card-shadow text-left transition-all ${
-              deckSize === 24
-                ? 'bg-card-player text-card-foreground ring-2 ring-primary'
-                : 'bg-card-player/70 text-card-foreground hover:card-shadow-hover'
-            }`}
-          >
-            <div className="text-2xl mb-2">🎴</div>
-            <h2 className="font-serif font-bold text-xl mb-2">24 cards</h2>
-            <p className="text-card-foreground/60 text-sm font-sans">
-              A wider range to explore.
-            </p>
-          </motion.button>
-        </div>
-      </motion.div>
-
-      <motion.button
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.5 }}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
-        onClick={onStart}
-        className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-sans font-medium"
+        className="flex items-center gap-6"
       >
-        Start
-      </motion.button>
+        <span className="text-muted-foreground text-sm font-sans">Deck size:</span>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setDeckSize(18)}
+            className={`px-4 py-2 rounded-lg text-sm font-sans transition-colors ${
+              deckSize === 18
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            18 cards
+          </button>
+          <button
+            onClick={() => setDeckSize(24)}
+            className={`px-4 py-2 rounded-lg text-sm font-sans transition-colors ${
+              deckSize === 24
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            24 cards
+          </button>
+        </div>
+      </motion.div>
     </div>
   );
 };

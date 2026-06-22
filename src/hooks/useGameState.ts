@@ -1,18 +1,19 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Value, ALL_VALUES } from '../data/values';
-import { NPCType, NPC_TYPES } from '../data/npcs';
 import {
   PartnerState,
+  Ranking,
   TradeConfig,
   DEFAULT_TRADE_CONFIG,
   dealThreeHands,
+  buildSolvableRanking,
   makePartner,
   validateOffer,
   decideOffer,
   applyAcceptedTrade,
   applyRejectedTrade,
+  hasAcceptableTrade,
   canFinishTrading as engineCanFinish,
-  shuffle,
 } from '../lib/tradeEngine';
 
 export type GamePhase =
@@ -25,14 +26,23 @@ export type GamePhase =
   | "debrief"
   | "summary";
 
+export interface PartnerDisplay {
+  id: string;
+  name: string;
+  avatar: string;
+}
+
+const PARTNER_DISPLAY: PartnerDisplay[] = [
+  { id: "A", name: "Partner A", avatar: "🟦" },
+  { id: "B", name: "Partner B", avatar: "🟨" },
+];
+
 export interface TradeRecord {
   order: number;
   partnerId: string;
-  partnerType: string;
   gave: string;
   received: string | null;
   accepted: boolean;
-  acceptProbability: number;
 }
 
 export interface DebriefAnswers {
@@ -48,7 +58,6 @@ export interface OfferOutcome {
   ok: boolean;
   reason?: string;
   accepted?: boolean;
-  dialogue?: string;
 }
 
 const PHASE_ORDER: GamePhase[] = [
@@ -56,17 +65,13 @@ const PHASE_ORDER: GamePhase[] = [
   "trade", "sort", "debrief", "summary",
 ];
 
-const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
-
 export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
   const [phase, setPhase] = useState<GamePhase>("mode-select");
   const [deckSize, setDeckSize] = useState<18 | 24>(18);
 
-  // dealtPlayerHand is the original snapshot; playerHand mutates as trades happen.
   const [dealtPlayerHand, setDealtPlayerHand] = useState<Value[]>([]);
   const [playerHand, setPlayerHand] = useState<Value[]>([]);
   const [partners, setPartners] = useState<PartnerState[]>([]);
-  const [partnerProfiles, setPartnerProfiles] = useState<NPCType[]>([]);
   const [trades, setTrades] = useState<TradeRecord[]>([]);
 
   const [finalTop, setFinalTop] = useState<string[]>([]);
@@ -84,32 +89,27 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
   const phaseIndex = PHASE_ORDER.indexOf(phase);
   const totalPhases = PHASE_ORDER.length - 1; // exclude mode-select
 
-  // Spec: in an 18-card deck (hand of 6) pick top 2; in 24 (hand of 8) pick top 3.
-  // (Condition 2 prose says "top 3" — to make this a flat 3, set topN = 3.)
+  // Spec 1d: top 2 from a hand of 6 (18-deck) / top 3 from a hand of 8 (24-deck).
+  // (Condition 2 prose says a flat "top 3" — to use that, set topN = 3.)
   const topN = deckSize === 18 ? 2 : 3;
+
+  const partnerProfiles = PARTNER_DISPLAY;
 
   const dealCards = useCallback(() => {
     const pool = deckSize === 18 ? ALL_VALUES.slice(0, 18) : [...ALL_VALUES];
     const [pHand, hA, hB] = dealThreeHands(pool);
 
-    // Two DISTINCT partner archetypes for flavor.
-    const profiles = shuffle(NPC_TYPES).slice(0, 2);
+    // Each partner gets a private random ranking, guaranteed to leave at least
+    // one acceptable trade against the player's opening hand.
+    const rankA: Ranking = buildSolvableRanking(pool, pHand, hA);
+    const rankB: Ranking = buildSolvableRanking(pool, pHand, hB);
 
     setDealtPlayerHand(pHand);
     setPlayerHand(pHand);
-    setPartnerProfiles(profiles);
-    setPartners([makePartner("A", hA), makePartner("B", hB)]);
+    setPartners([makePartner("A", hA, rankA), makePartner("B", hB, rankB)]);
     setTrades([]);
     setPhase("deal");
   }, [deckSize]);
-
-  const profileFor = useCallback(
-    (partnerId: string): NPCType | undefined => {
-      const idx = partners.findIndex((p) => p.id === partnerId);
-      return idx === -1 ? undefined : partnerProfiles[idx];
-    },
-    [partners, partnerProfiles]
-  );
 
   const makeOffer = useCallback(
     (partnerId: string, giveName: string, getName: string): OfferOutcome => {
@@ -117,30 +117,20 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
       if (idx === -1) return { ok: false, reason: "Unknown partner." };
 
       const partner = partners[idx];
-      const profile = partnerProfiles[idx];
-
-      const validation = validateOffer(playerHand, partner, giveName, getName, config);
+      const validation = validateOffer(playerHand, partner, giveName, getName);
       if (!validation.ok) {
         const reason = "reason" in validation ? validation.reason : undefined;
         return { ok: false, reason };
       }
 
-      const { accepted, probability } = decideOffer(partner, config, Math.random());
-
-      let dialogue: string;
+      const accepted = decideOffer(partner, giveName, getName);
       if (accepted) {
         const res = applyAcceptedTrade(playerHand, partner, giveName, getName);
         setPlayerHand(res.playerHand);
         setPartners((prev) => prev.map((p, i) => (i === idx ? res.partner : p)));
-        dialogue = pick(profile.responses.acceptLow)
-          .replace(/\{offeredCard\}/g, giveName)
-          .replace(/\{wantedCard\}/g, getName);
       } else {
-        const updated = applyRejectedTrade(partner, config);
+        const updated = applyRejectedTrade(partner);
         setPartners((prev) => prev.map((p, i) => (i === idx ? updated : p)));
-        dialogue = pick(profile.responses.declineHigh)
-          .replace(/\{offeredCard\}/g, giveName)
-          .replace(/\{wantedCard\}/g, getName);
       }
 
       setTrades((prev) => [
@@ -148,22 +138,28 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
         {
           order: prev.length + 1,
           partnerId,
-          partnerType: profile.id,
           gave: giveName,
           received: accepted ? getName : null,
           accepted,
-          acceptProbability: Number(probability.toFixed(2)),
         },
       ]);
 
-      return { ok: true, accepted, dialogue };
+      return { ok: true, accepted };
     },
-    [partners, partnerProfiles, playerHand, config]
+    [partners, playerHand]
   );
 
   const canFinishTrading = useMemo(
-    () => partners.length > 0 && engineCanFinish(partners, config),
-    [partners, config]
+    () => partners.length > 0 && engineCanFinish(playerHand, partners, config),
+    [playerHand, partners, config]
+  );
+
+  const partnerMaxedOut = useCallback(
+    (partnerId: string): boolean => {
+      const p = partners.find((x) => x.id === partnerId);
+      return !!p && !hasAcceptableTrade(playerHand, p);
+    },
+    [partners, playerHand]
   );
 
   const toggleTop = useCallback(
@@ -182,7 +178,6 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
     setDealtPlayerHand([]);
     setPlayerHand([]);
     setPartners([]);
-    setPartnerProfiles([]);
     setTrades([]);
     setFinalTop([]);
     setFinalTopReason("");
@@ -197,14 +192,19 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
   }, []);
 
   const exportData = useCallback(() => {
+    const rankingToList = (r: Ranking) =>
+      Object.entries(r).sort((a, b) => a[1] - b[1]).map(([name]) => name);
+
     const data = {
       sessionId: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       timestamp: new Date().toISOString(),
       condition: "2-trade-and-sort",
       deckVersion: String(deckSize),
-      partners: partnerProfiles.map((p, i) => ({
-        id: partners[i]?.id,
-        type: p.id,
+      partners: partners.map((p) => ({
+        id: p.id,
+        privateRanking: rankingToList(p.ranking), // most -> least valued
+        successfulTrades: p.successes,
+        offersReceived: p.offersMade,
       })),
       dealtHand: dealtPlayerHand.map((v) => v.name),
       trades,
@@ -227,13 +227,13 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
     link.download = `value-cards-session-${Date.now()}.json`;
     link.click();
     URL.revokeObjectURL(url);
-  }, [deckSize, partners, partnerProfiles, dealtPlayerHand, trades, playerHand, topN, finalTop, finalTopReason, debriefAnswers]);
+  }, [deckSize, partners, dealtPlayerHand, trades, playerHand, topN, finalTop, finalTopReason, debriefAnswers]);
 
   return {
     phase, setPhase, phaseIndex, totalPhases,
     deckSize, setDeckSize,
     dealtPlayerHand, playerHand,
-    partners, partnerProfiles, profileFor,
+    partners, partnerProfiles, partnerMaxedOut,
     trades,
     topN, finalTop, toggleTop, finalTopReason, setFinalTopReason,
     debriefAnswers, setDebriefAnswers,

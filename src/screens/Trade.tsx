@@ -1,35 +1,34 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Value } from '../data/values';
-import { NPCType } from '../data/npcs';
 import { PartnerState } from '../lib/tradeEngine';
-import { OfferOutcome } from '../hooks/useGameState';
+import { PartnerDisplay, OfferOutcome } from '../hooks/useGameState';
 import ValueCard from '../components/ValueCard';
-import NpcSpeechBubble from '../components/NpcSpeechBubble';
 
 interface TradeProps {
   playerHand: Value[];
   partners: PartnerState[];
-  partnerProfiles: NPCType[];
+  partnerProfiles: PartnerDisplay[];
   makeOffer: (partnerId: string, give: string, get: string) => OfferOutcome;
   canFinishTrading: boolean;
+  partnerMaxedOut: (partnerId: string) => boolean;
   onContinue: () => void;
 }
 
 const Trade = ({
-  playerHand, partners, partnerProfiles, makeOffer, canFinishTrading, onContinue,
+  playerHand, partners, partnerProfiles, makeOffer, canFinishTrading, partnerMaxedOut, onContinue,
 }: TradeProps) => {
   const [activeId, setActiveId] = useState(partners[0]?.id ?? "A");
   const [give, setGive] = useState<string | null>(null);
   const [get, setGet] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<{ accepted: boolean; dialogue: string; name: string } | null>(null);
+  const [result, setResult] = useState<{ accepted: boolean } | null>(null);
 
   const activeIdx = partners.findIndex((p) => p.id === activeId);
   const partner = partners[activeIdx];
   const profile = partnerProfiles[activeIdx];
+  const maxedOut = partnerMaxedOut(activeId);
 
-  // If a trade changed the hands, drop any now-invalid selection.
   useEffect(() => {
     if (give && !playerHand.some((v) => v.name === give)) setGive(null);
   }, [playerHand, give]);
@@ -45,7 +44,6 @@ const Trade = ({
   };
 
   const lockedHere = partner?.lockedCards ?? [];
-  const partnerDone = !partner || partner.exhausted;
 
   const handleOffer = () => {
     if (!give || !get) {
@@ -58,7 +56,7 @@ const Trade = ({
       setError(outcome.reason ?? "That trade isn't allowed.");
       return;
     }
-    setResult({ accepted: !!outcome.accepted, dialogue: outcome.dialogue ?? "", name: profile.name });
+    setResult({ accepted: !!outcome.accepted });
     setGet(null);
     if (outcome.accepted) setGive(null);
   };
@@ -70,7 +68,7 @@ const Trade = ({
         <div className="text-center mb-6">
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground mb-2">Trade</h1>
           <p className="text-muted-foreground font-sans text-sm mb-4">
-            Make trades until you've completed at least one with <em>each</em> partner. You can keep going after that.
+            Trade with both partners. Keep going as long as they'll deal — push each as far as it will go.
           </p>
           <div className="flex items-center justify-center gap-3">
             {partners.map((p, i) => (
@@ -107,23 +105,32 @@ const Trade = ({
                     index={i}
                     isSelected={give === v.name}
                     isDimmed={locked}
-                    onClick={!locked && !partnerDone ? () => setGive(v.name) : undefined}
+                    onClick={!locked && !maxedOut ? () => setGive(v.name) : undefined}
                   />
                 );
               })}
             </div>
           </div>
 
-          {/* Center — the offer + response */}
+          {/* Center — the offer + plain outcome */}
           <div className="lg:col-span-4 flex flex-col gap-5">
-            {result && (
-              <NpcSpeechBubble
-                avatar={profile.avatar}
-                name={result.name}
-                dialogue={result.dialogue}
-                isRefusal={!result.accepted}
-              />
-            )}
+            <AnimatePresence mode="wait">
+              {result && (
+                <motion.div
+                  key={`${result.accepted}-${partner?.offersMade}`}
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className={`rounded-xl px-5 py-3 text-center font-sans text-sm font-semibold border ${
+                    result.accepted
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'bg-muted border-border text-muted-foreground'
+                  }`}
+                >
+                  {result.accepted ? "✓ Trade accepted" : "✗ Declined"}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div className="bg-muted/50 border border-border rounded-2xl p-5 space-y-4">
               <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans text-center">
@@ -139,9 +146,9 @@ const Trade = ({
                 </span>
               </div>
               {error && <p className="text-destructive text-xs font-sans text-center">{error}</p>}
-              {partnerDone ? (
+              {maxedOut ? (
                 <p className="text-muted-foreground text-xs font-sans text-center">
-                  {profile?.name} isn't trading anymore.
+                  {profile?.name} won't accept any trade you can offer right now.
                 </p>
               ) : (
                 <button
@@ -164,7 +171,7 @@ const Trade = ({
               </button>
               {!canFinishTrading && (
                 <p className="text-muted-foreground text-xs font-sans mt-2">
-                  Complete one trade with each partner to continue.
+                  Complete at least one trade with each partner to continue.
                 </p>
               )}
             </div>
@@ -176,7 +183,6 @@ const Trade = ({
               <span className="text-xs uppercase tracking-widest text-muted-foreground font-sans">
                 {profile?.name}'s hand — request one
               </span>
-              <p className="text-xs text-muted-foreground font-sans mt-1">{profile?.description}</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {partner?.hand.map((v, i) => {
@@ -190,7 +196,7 @@ const Trade = ({
                     isPlayer={false}
                     isSelected={get === v.name}
                     isDimmed={locked}
-                    onClick={!locked && !partnerDone ? () => setGet(v.name) : undefined}
+                    onClick={!locked && !maxedOut ? () => setGet(v.name) : undefined}
                   />
                 );
               })}

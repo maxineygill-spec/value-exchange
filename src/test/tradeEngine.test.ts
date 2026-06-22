@@ -1,18 +1,20 @@
 import { describe, it, expect } from "vitest";
-import { ALL_VALUES } from "../data/values";
+import { ALL_VALUES, Value } from "../data/values";
 import {
   DEFAULT_TRADE_CONFIG,
   dealThreeHands,
+  buildRanking,
+  buildSolvableRanking,
   makePartner,
   validateOffer,
   decideOffer,
   applyAcceptedTrade,
   applyRejectedTrade,
+  hasAcceptableTrade,
   canFinishTrading,
   PartnerState,
 } from "../lib/tradeEngine";
 
-// Small seeded RNG so the simulation is deterministic and reproducible.
 function mulberry32(seed: number) {
   return function () {
     seed |= 0;
@@ -23,6 +25,9 @@ function mulberry32(seed: number) {
   };
 }
 
+const byName = (names: string[]): Value[] =>
+  names.map((n) => ALL_VALUES.find((v) => v.name === n)!);
+
 describe("dealThreeHands", () => {
   it("uses the whole deck with equal, non-overlapping hands", () => {
     for (const deck of [ALL_VALUES.slice(0, 18), ALL_VALUES]) {
@@ -31,91 +36,121 @@ describe("dealThreeHands", () => {
       expect(a).toHaveLength(size);
       expect(b).toHaveLength(size);
       expect(c).toHaveLength(size);
-      const all = [...a, ...b, ...c].map((v) => v.name);
-      expect(new Set(all).size).toBe(deck.length); // no dupes, no discards
+      expect(new Set([...a, ...b, ...c].map((v) => v.name)).size).toBe(deck.length);
     }
   });
 });
 
-/**
- * Simulate a participant who plays randomly: pick a partner, pick a random
- * legal give/get, make the offer, repeat until the gate is met. This is the
- * worst case for "getting stuck" — if a random player always finishes, a
- * deliberate one certainly will.
- */
+describe("deterministic acceptance (the spec rule)", () => {
+  it("accepts iff the offered card outranks the requested card", () => {
+    // Partner values Freedom (4th) above Happiness (5th), Order (6th) below it.
+    const ranking: Record<string, number> = {
+      Freedom: 4, Happiness: 5, Order: 6,
+    };
+    const partner: PartnerState = {
+      id: "A", hand: byName(["Happiness"]), ranking,
+      offersMade: 0, successes: 0, lockedCards: [],
+    };
+    // Offer Freedom (4) for Happiness (5): 4 < 5 -> accept.
+    expect(decideOffer(partner, "Freedom", "Happiness")).toBe(true);
+    // Offer Order (6) for Happiness (5): 6 < 5 is false -> reject.
+    expect(decideOffer(partner, "Order", "Happiness")).toBe(false);
+  });
+
+  it("is adamant: a rejected offer stays rejected no matter how many times it's tried", () => {
+    let partner: PartnerState = {
+      id: "A", hand: byName(["Happiness"]), ranking: { Order: 6, Happiness: 5 },
+      offersMade: 0, successes: 0, lockedCards: [],
+    };
+    for (let i = 0; i < 25; i++) {
+      const accepted = decideOffer(partner, "Order", "Happiness");
+      expect(accepted).toBe(false); // never "wears down"
+      partner = applyRejectedTrade(partner);
+    }
+  });
+});
+
+describe("buildSolvableRanking", () => {
+  it("always leaves at least one acceptable trade against the player's hand", () => {
+    for (let seed = 1; seed <= 1000; seed++) {
+      const rng = mulberry32(seed);
+      const pool = ALL_VALUES.slice(0, 18);
+      const [pHand, hand] = dealThreeHands(pool, rng);
+      const ranking = buildSolvableRanking(pool, pHand, hand, rng);
+      const partner = makePartner("A", hand, ranking);
+      expect(hasAcceptableTrade(pHand, partner)).toBe(true);
+    }
+  });
+});
+
+// A greedy player: whenever a partner needs a trade and one exists, take it.
 function simulate(deckSize: 18 | 24, seed: number) {
   const rng = mulberry32(seed);
   const pool = deckSize === 18 ? ALL_VALUES.slice(0, 18) : ALL_VALUES;
   const [pHand, hA, hB] = dealThreeHands(pool, rng);
   let playerHand = pHand;
-  let partners: PartnerState[] = [makePartner("A", hA), makePartner("B", hB)];
+  let partners: PartnerState[] = [
+    makePartner("A", hA, buildSolvableRanking(pool, pHand, hA, rng)),
+    makePartner("B", hB, buildSolvableRanking(pool, pHand, hB, rng)),
+  ];
   const config = DEFAULT_TRADE_CONFIG;
   const handSize = pool.length / 3;
 
   let guard = 0;
-  while (!canFinishTrading(partners, config)) {
-    guard++;
-    if (guard > 1000) throw new Error("did not converge — possible soft-lock");
+  while (!canFinishTrading(playerHand, partners, config)) {
+    if (++guard > 500) throw new Error("did not converge");
 
-    // Choose a partner that still needs a successful trade and isn't exhausted.
     const pIdx = partners.findIndex(
-      (p) => p.successes < config.requiredSuccessesPerPartner && !p.exhausted
+      (p) => p.successes < config.requiredSuccessesPerPartner && hasAcceptableTrade(playerHand, p)
     );
-    if (pIdx === -1) break; // would indicate an unreachable gate
+    // If no partner needs AND can trade, the gate must already be satisfiable.
+    if (pIdx === -1) break;
     const partner = partners[pIdx];
 
-    const giveOptions = playerHand.filter(
-      (v) => !partner.lockedCards.includes(v.name)
-    );
-    const getOptions = partner.hand.filter(
-      (v) => !partner.lockedCards.includes(v.name)
-    );
-    if (!giveOptions.length || !getOptions.length) {
-      throw new Error("ran out of legal cards before completing a trade");
+    // Find an acceptable, legal trade.
+    let made = false;
+    for (const g of playerHand) {
+      if (partner.lockedCards.includes(g.name)) continue;
+      for (const r of partner.hand) {
+        if (partner.lockedCards.includes(r.name)) continue;
+        if (decideOffer(partner, g.name, r.name)) {
+          expect(validateOffer(playerHand, partner, g.name, r.name).ok).toBe(true);
+          const res = applyAcceptedTrade(playerHand, partner, g.name, r.name);
+          playerHand = res.playerHand;
+          partners = partners.map((p, i) => (i === pIdx ? res.partner : p));
+          made = true;
+          break;
+        }
+      }
+      if (made) break;
     }
-    const give = giveOptions[Math.floor(rng() * giveOptions.length)].name;
-    const get = getOptions[Math.floor(rng() * getOptions.length)].name;
-
-    const v = validateOffer(playerHand, partner, give, get, config);
-    expect(v.ok).toBe(true);
-
-    const { accepted } = decideOffer(partner, config, rng());
-    if (accepted) {
-      const res = applyAcceptedTrade(playerHand, partner, give, get);
-      playerHand = res.playerHand;
-      partners = partners.map((p, i) => (i === pIdx ? res.partner : p));
-    } else {
-      partners = partners.map((p, i) =>
-        i === pIdx ? applyRejectedTrade(p, config) : p
-      );
-    }
-
-    // Invariant: hand size never changes (trades are strictly 1-for-1).
+    expect(made).toBe(true);
     expect(playerHand).toHaveLength(handSize);
   }
-
   return { playerHand, partners, handSize };
 }
 
 describe("trade simulation", () => {
-  it("a random player always reaches the gate (no soft-locks) across many seeds", () => {
+  it("every deal is completable — no hard locks across many seeds", () => {
     for (let seed = 1; seed <= 500; seed++) {
-      const { partners } = simulate(18, seed);
-      expect(canFinishTrading(partners, DEFAULT_TRADE_CONFIG)).toBe(true);
-      expect(partners[0].successes).toBeGreaterThanOrEqual(1);
-      expect(partners[1].successes).toBeGreaterThanOrEqual(1);
-    }
-    for (let seed = 1; seed <= 500; seed++) {
-      const { partners } = simulate(24, seed);
-      expect(canFinishTrading(partners, DEFAULT_TRADE_CONFIG)).toBe(true);
+      const { playerHand, partners } = simulate(18, seed);
+      expect(canFinishTrading(playerHand, partners, DEFAULT_TRADE_CONFIG)).toBe(true);
+      // Each partner is either traded with, or genuinely has nothing acceptable left.
+      for (const p of partners) {
+        const done = p.successes >= 1 || !hasAcceptableTrade(playerHand, p);
+        expect(done).toBe(true);
+      }
     }
   });
 
-  it("never lets a locked card trade twice with the same partner", () => {
-    const { partners } = simulate(24, 42);
-    for (const p of partners) {
-      // Locked list has no duplicates → each card locked at most once.
-      expect(new Set(p.lockedCards).size).toBe(p.lockedCards.length);
+  it("preserves hand size and never double-locks a card", () => {
+    for (let seed = 1; seed <= 200; seed++) {
+      const { partners, handSize, playerHand } = simulate(24, seed);
+      expect(playerHand).toHaveLength(handSize);
+      for (const p of partners) {
+        expect(new Set(p.lockedCards).size).toBe(p.lockedCards.length);
+      }
+      expect(canFinishTrading(playerHand, partners, DEFAULT_TRADE_CONFIG)).toBe(true);
     }
   });
 });

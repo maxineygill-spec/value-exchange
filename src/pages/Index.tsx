@@ -52,6 +52,7 @@ const Index = () => {
             partnerProfiles={game.partnerProfiles}
             makeOffer={game.makeOffer}
             canFinishTrading={game.canFinishTrading}
+            partnerMaxedOut={game.partnerMaxedOut}
             onContinue={() => game.setPhase("sort")}
           />
         );

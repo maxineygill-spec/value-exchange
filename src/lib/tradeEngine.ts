@@ -3,58 +3,47 @@ import { Value } from "../data/values";
 /**
  * Pure trade-engine logic for Condition 2 (simulated trading before sorting).
  *
- * Everything here is side-effect free and deterministic given an RNG, so it can
- * be unit-tested (see src/test/tradeEngine.test.ts). The React hook
- * (useGameState) wraps these functions with useState.
+ * DETERMINISTIC MODEL: at deal time, each partner is given a private random
+ * ranking over ALL values in play (1 = most valued). A partner accepts an offer
+ * if and only if it values the card being OFFERED to it more highly than the
+ * card being REQUESTED from it — i.e. rank(offered) < rank(requested). Partners
+ * are adamant: the same offer always gets the same answer, so re-offering a
+ * rejected trade can't "wear them down". There is no probability and no streak.
  *
- * ── TUNABLE STUDY PARAMETERS ───────────────────────────────────────────────
- * These are the knobs the spec talks about. Change them here, in one place.
+ * Side-effect free and deterministic, so it can be unit-tested.
  */
 export interface TradeConfig {
-  /** Baseline chance a virtual partner accepts an offer. Spec: start < 50%. */
-  baseAcceptProb: number;
-  /**
-   * How much the accept chance climbs for each *consecutive* rejection by the
-   * same partner (resets to 0 on a successful trade). This keeps early
-   * rejections common while GUARANTEEING the participant can eventually land a
-   * trade with each partner — so the "≥1 trade with each" gate is never
-   * unreachable and nobody gets stuck.
-   */
-  rejectionBonus: number;
-  /** Hard cutoff: a partner stops trading after this many offers. */
-  maxOffersPerPartner: number;
   /** Successful trades required with EACH partner before sorting. Spec: 1. */
   requiredSuccessesPerPartner: number;
 }
 
 export const DEFAULT_TRADE_CONFIG: TradeConfig = {
-  baseAcceptProb: 0.4, // 40% — below 50% per the endowment-effect rationale
-  rejectionBonus: 0.2, // 3 consecutive rejections → guaranteed accept on the 4th
-  maxOffersPerPartner: 12,
   requiredSuccessesPerPartner: 1,
 };
+
+/** name -> rank, where 1 is the partner's MOST valued value. */
+export type Ranking = Record<string, number>;
 
 export interface PartnerState {
   id: string;
   /** Cards this partner currently holds. */
   hand: Value[];
+  /** Private full preference ordering over all values in play. */
+  ranking: Ranking;
   offersMade: number;
   successes: number;
-  rejectionStreak: number;
   /**
-   * Card names that have already changed hands with this partner (in either
-   * direction). Locked cards can't be traded with this partner again — this
-   * enforces the spec's "don't trade back what you received" and "no trading
-   * the same card back and forth" constraints.
+   * Card names already traded with this partner (either direction). Locked from
+   * trading with this partner again — prevents re-trading received cards and
+   * any ping-pong. (The ranking rule already forbids ping-pong, but this is an
+   * explicit guard.)
    */
   lockedCards: string[];
-  /** True once the cutoff is hit; partner declines all further offers. */
-  exhausted: boolean;
 }
 
 export type OfferValidation = { ok: true } | { ok: false; reason: string };
 
-/** Fisher–Yates shuffle (uniform, unlike `sort(() => Math.random() - 0.5)`). */
+/** Fisher–Yates shuffle (uniform). */
 export function shuffle<T>(arr: T[], rng: () => number = Math.random): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -64,10 +53,7 @@ export function shuffle<T>(arr: T[], rng: () => number = Math.random): T[] {
   return a;
 }
 
-/**
- * Split the full deck into three equal hands (player + two partners), using the
- * WHOLE deck so no cards are discarded. Spec: each player gets D/3 cards.
- */
+/** Split the full deck into three equal hands (player + two partners). */
 export function dealThreeHands(
   pool: Value[],
   rng: () => number = Math.random
@@ -81,28 +67,71 @@ export function dealThreeHands(
   ];
 }
 
-export function makePartner(id: string, hand: Value[]): PartnerState {
-  return {
-    id,
-    hand,
-    offersMade: 0,
-    successes: 0,
-    rejectionStreak: 0,
-    lockedCards: [],
-    exhausted: false,
-  };
+/** A random total ranking over the given values (1 = most valued). */
+export function buildRanking(values: Value[], rng: () => number = Math.random): Ranking {
+  const order = shuffle(values, rng);
+  const ranking: Ranking = {};
+  order.forEach((v, i) => {
+    ranking[v.name] = i + 1;
+  });
+  return ranking;
 }
 
-/** Can this specific offer legally be made? */
+/** Does any acceptable (unlocked) trade exist between this hand and partner? */
+export function hasAcceptableTrade(
+  playerHand: Value[],
+  partner: PartnerState
+): boolean {
+  for (const g of playerHand) {
+    if (partner.lockedCards.includes(g.name)) continue;
+    for (const r of partner.hand) {
+      if (partner.lockedCards.includes(r.name)) continue;
+      if (partner.ranking[g.name] < partner.ranking[r.name]) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Build a ranking that is GUARANTEED to leave at least one acceptable trade
+ * against the given player hand, so the "trade with each partner" gate is always
+ * reachable at the start. Falls back to a single rank-swap if a random ranking
+ * happens to be unsolvable (~0.1% of deals).
+ */
+export function buildSolvableRanking(
+  allValues: Value[],
+  playerHand: Value[],
+  partnerHand: Value[],
+  rng: () => number = Math.random
+): Ranking {
+  const ranking = buildRanking(allValues, rng);
+  const probe: PartnerState = {
+    id: "probe", hand: partnerHand, ranking, offersMade: 0, successes: 0, lockedCards: [],
+  };
+  if (hasAcceptableTrade(playerHand, probe)) return ranking;
+
+  // Unsolvable: make the player's best-ranked card outrank the partner's worst.
+  const gStar = [...playerHand].sort((a, b) => ranking[a.name] - ranking[b.name])[0];
+  const rStar = [...partnerHand].sort((a, b) => ranking[b.name] - ranking[a.name])[0];
+  if (gStar && rStar) {
+    const tmp = ranking[gStar.name];
+    ranking[gStar.name] = ranking[rStar.name];
+    ranking[rStar.name] = tmp;
+  }
+  return ranking;
+}
+
+export function makePartner(id: string, hand: Value[], ranking: Ranking): PartnerState {
+  return { id, hand, ranking, offersMade: 0, successes: 0, lockedCards: [] };
+}
+
+/** Can this specific offer legally be made? (Legality, not acceptance.) */
 export function validateOffer(
   playerHand: Value[],
   partner: PartnerState,
   giveName: string,
-  getName: string,
-  config: TradeConfig
+  getName: string
 ): OfferValidation {
-  if (partner.exhausted || partner.offersMade >= config.maxOffersPerPartner)
-    return { ok: false, reason: "This partner isn't trading anymore." };
   if (giveName === getName)
     return { ok: false, reason: "Offer and request must be different cards." };
   if (!playerHand.some((v) => v.name === giveName))
@@ -114,32 +143,19 @@ export function validateOffer(
   return { ok: true };
 }
 
-export function acceptanceProbability(
-  partner: PartnerState,
-  config: TradeConfig
-): number {
-  return Math.min(
-    1,
-    config.baseAcceptProb + config.rejectionBonus * partner.rejectionStreak
-  );
-}
-
-export interface OfferDecision {
-  accepted: boolean;
-  probability: number;
-}
-
-/** Decide accept/reject given a random roll in [0, 1). Pure. */
+/**
+ * The deterministic decision: accept iff the partner values the offered card
+ * more than the requested card. Pure, stable, un-hackable.
+ */
 export function decideOffer(
   partner: PartnerState,
-  config: TradeConfig,
-  roll: number
-): OfferDecision {
-  const probability = acceptanceProbability(partner, config);
-  return { accepted: roll < probability, probability };
+  giveName: string,
+  getName: string
+): boolean {
+  return partner.ranking[giveName] < partner.ranking[getName];
 }
 
-/** Apply an accepted trade. Returns the new player hand + new partner state. */
+/** Apply an accepted trade. Returns new player hand + new partner state. */
 export function applyAcceptedTrade(
   playerHand: Value[],
   partner: PartnerState,
@@ -155,33 +171,28 @@ export function applyAcceptedTrade(
       hand: partner.hand.filter((v) => v.name !== getName).concat(giveCard),
       offersMade: partner.offersMade + 1,
       successes: partner.successes + 1,
-      rejectionStreak: 0,
       lockedCards: [...partner.lockedCards, giveName, getName],
-      exhausted: false,
     },
   };
 }
 
-/** Apply a rejected trade (no cards move; streak + offer count climb). */
-export function applyRejectedTrade(
-  partner: PartnerState,
-  config: TradeConfig
-): PartnerState {
-  const offersMade = partner.offersMade + 1;
-  return {
-    ...partner,
-    offersMade,
-    rejectionStreak: partner.rejectionStreak + 1,
-    exhausted: offersMade >= config.maxOffersPerPartner,
-  };
+/** Apply a rejected trade (nothing moves; partner is unmoved). */
+export function applyRejectedTrade(partner: PartnerState): PartnerState {
+  return { ...partner, offersMade: partner.offersMade + 1 };
 }
 
-/** Has the participant met the "≥1 trade with each partner" gate? */
+/**
+ * Gate: each partner is either traded with the required number of times, OR has
+ * no acceptable trade left against the current hand (genuinely maxed out).
+ */
 export function canFinishTrading(
+  playerHand: Value[],
   partners: PartnerState[],
   config: TradeConfig
 ): boolean {
   return partners.every(
-    (p) => p.successes >= config.requiredSuccessesPerPartner
+    (p) =>
+      p.successes >= config.requiredSuccessesPerPartner ||
+      !hasAcceptableTrade(playerHand, p)
   );
 }
