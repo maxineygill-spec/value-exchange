@@ -24,72 +24,37 @@ const ModeSelect = ({ deckSize, setDeckSize, onStart }: ModeSelectProps) => {
       </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10 max-w-lg w-full">
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.5 }}
-          whileHover={{ y: -4 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={onStart}
-          className="bg-card-player text-card-foreground rounded-2xl p-6 card-shadow text-left transition-shadow hover:card-shadow-hover"
-        >
-          <div className="text-2xl mb-2">🃏</div>
-          <h2 className="font-serif font-bold text-xl mb-2">Solo</h2>
-          <p className="text-card-foreground/60 text-sm font-sans">
-            Play against an NPC partner
-          </p>
-          <p className="text-card-foreground/40 text-xs font-sans mt-2">
-            Good for: exploring your values alone
-          </p>
-        </motion.button>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.5 }}
-          className="bg-muted rounded-2xl p-6 text-left opacity-50 cursor-not-allowed"
-        >
-          <div className="text-2xl mb-2">👥</div>
-          <h2 className="font-serif font-bold text-xl mb-2 text-foreground">With Someone</h2>
-          <p className="text-muted-foreground text-sm font-sans">
-            Share a code with a real person
-          </p>
-          <p className="text-muted-foreground/60 text-xs font-sans mt-2">
-            Multiplayer — coming soon
-          </p>
-        </motion.div>
+        {([18, 24] as const).map((size, i) => (
+          <motion.button
+            key={size}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 + i * 0.1, duration: 0.5 }}
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setDeckSize(size)}
+            className={`bg-card-player text-card-foreground rounded-2xl p-6 card-shadow text-left transition-all hover:card-shadow-hover ${
+              deckSize === size ? 'ring-2 ring-primary' : ''
+            }`}
+          >
+            <div className="text-2xl mb-2">🃏</div>
+            <h2 className="font-serif font-bold text-xl mb-2">{size} cards</h2>
+            <p className="text-card-foreground/60 text-sm font-sans">
+              {size === 18 ? 'Shorter game, focused choices' : 'Longer game, wider exploration'}
+            </p>
+          </motion.button>
+        ))}
       </div>
 
-      <motion.div
+      <motion.button
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.5 }}
-        className="flex items-center gap-6"
+        onClick={onStart}
+        className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-sans text-sm hover:opacity-90 transition-opacity"
       >
-        <span className="text-muted-foreground text-sm font-sans">Deck size:</span>
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setDeckSize(18)}
-            className={`px-4 py-2 rounded-lg text-sm font-sans transition-colors ${
-              deckSize === 18
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            18 cards
-          </button>
-          <button
-            onClick={() => setDeckSize(24)}
-            className={`px-4 py-2 rounded-lg text-sm font-sans transition-colors ${
-              deckSize === 24
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            24 cards
-          </button>
-        </div>
-      </motion.div>
+        Start
+      </motion.button>
     </div>
   );
 };
