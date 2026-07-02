@@ -219,7 +219,8 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
       dealtHand: dealtPlayerHand.map((v) => v.name),
       trades,
       finalHand: playerHand.map((v) => v.name),
-      topSelection: { n: topN, values: finalTop, reason: finalTopReason },
+      topSelection: { n: topN, values: finalTop },
+      timing: phaseTiming,
       debrief: {
         hardestToGiveUp: debriefAnswers.hardestToGiveUp,
         whyHardest: debriefAnswers.whyHardest,
