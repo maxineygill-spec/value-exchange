@@ -68,6 +68,15 @@ const PHASE_ORDER: GamePhase[] = [
 export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
   const [phase, setPhase] = useState<GamePhase>("mode-select");
   const [deckSize, setDeckSize] = useState<18 | 24>(18);
+  const [phaseStartTime, setPhaseStartTime] = useState<number>(Date.now());
+  const [phaseTiming, setPhaseTiming] = useState<Record<string, number>>({});
+
+  const advancePhase = useCallback((next: GamePhase) => {
+    const elapsed = Date.now() - phaseStartTime;
+    setPhaseTiming(prev => ({ ...prev, [phase]: elapsed }));
+    setPhaseStartTime(Date.now());
+    setPhase(next);
+  }, [phase, phaseStartTime]);
 
   const [dealtPlayerHand, setDealtPlayerHand] = useState<Value[]>([]);
   const [playerHand, setPlayerHand] = useState<Value[]>([]);
