@@ -100,7 +100,7 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
 
   // Spec 1d: top 2 from a hand of 6 (18-deck) / top 3 from a hand of 8 (24-deck).
   // (Condition 2 prose says a flat "top 3" — to use that, set topN = 3.)
-  const topN = deckSize === 18 ? 2 : 3;
+  const topN = 3;
 
   const partnerProfiles = PARTNER_DISPLAY;
 
