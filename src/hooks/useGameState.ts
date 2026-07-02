@@ -238,15 +238,16 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
     link.download = `value-cards-session-${Date.now()}.json`;
     link.click();
     URL.revokeObjectURL(url);
-  }, [deckSize, partners, dealtPlayerHand, trades, playerHand, topN, finalTop, finalTopReason, debriefAnswers]);
+  }, [deckSize, partners, dealtPlayerHand, trades, playerHand, topN, finalTop, debriefAnswers, phaseTiming]);
 
   return {
-    phase, setPhase, phaseIndex, totalPhases,
+    phase, setPhase, advancePhase, phaseIndex, totalPhases,
+    phaseTiming, phaseStartTime,
     deckSize, setDeckSize,
     dealtPlayerHand, playerHand,
     partners, partnerProfiles, partnerMaxedOut,
     trades,
-    topN, finalTop, toggleTop, finalTopReason, setFinalTopReason,
+    topN, finalTop, toggleTop,
     debriefAnswers, setDebriefAnswers,
     dealCards, makeOffer, canFinishTrading,
     resetGame, exportData,
