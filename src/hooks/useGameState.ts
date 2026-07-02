@@ -189,7 +189,8 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
     setPartners([]);
     setTrades([]);
     setFinalTop([]);
-    setFinalTopReason("");
+    setPhaseStartTime(Date.now());
+    setPhaseTiming({});
     setDebriefAnswers({
       hardestToGiveUp: "",
       whyHardest: "",
