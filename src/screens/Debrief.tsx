@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Value } from '../data/values';
 import { DebriefAnswers } from '../hooks/useGameState';
@@ -11,28 +10,13 @@ interface DebriefProps {
 }
 
 const Debrief = ({ dealtPlayerHand, debriefAnswers, setDebriefAnswers, onContinue }: DebriefProps) => {
-  const [error, setError] = useState("");
-
   const update = (key: keyof DebriefAnswers, value: string | boolean) => {
     setDebriefAnswers({ ...debriefAnswers, [key]: value });
   };
 
-  const handleSubmit = () => {
-    const { hardestToGiveUp, whyHardest, learnedAboutPartner, hiddenCommonGround } = debriefAnswers;
-    if (!hardestToGiveUp || !whyHardest.trim() || !learnedAboutPartner.trim() || !hiddenCommonGround.trim()) {
-      setError("All questions are required. Take your time — this reflection matters.");
-      return;
-    }
-    if (debriefAnswers.didMindChange && !debriefAnswers.whatShifted.trim()) {
-      setError("Please share what shifted for you.");
-      return;
-    }
-    setError("");
-    onContinue();
-  };
-
   const inputClass = "w-full bg-muted border border-border rounded-xl p-4 text-foreground text-sm font-sans focus:ring-2 ring-primary/50 outline-none transition-all resize-none";
-  const labelClass = "block text-foreground font-sans font-medium mb-2 text-sm";
+  const labelClass = "block text-foreground font-sans font-medium mb-1 text-sm";
+  const optionalHint = <p className="text-xs text-muted-foreground mb-2 font-sans">(optional)</p>;
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-12">
@@ -42,9 +26,9 @@ const Debrief = ({ dealtPlayerHand, debriefAnswers, setDebriefAnswers, onContinu
       </motion.div>
 
       <div className="w-full max-w-lg space-y-6">
-        {/* Q1 */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <label className={labelClass}>Which card was hardest to give up?</label>
+          {optionalHint}
           <select
             value={debriefAnswers.hardestToGiveUp}
             onChange={(e) => update("hardestToGiveUp", e.target.value)}
@@ -57,9 +41,9 @@ const Debrief = ({ dealtPlayerHand, debriefAnswers, setDebriefAnswers, onContinu
           </select>
         </motion.div>
 
-        {/* Q2 */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <label className={labelClass}>Why was it hard to let go of?</label>
+          {optionalHint}
           <textarea
             className={inputClass}
             rows={3}
@@ -68,9 +52,9 @@ const Debrief = ({ dealtPlayerHand, debriefAnswers, setDebriefAnswers, onContinu
           />
         </motion.div>
 
-        {/* Q3 */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <label className={labelClass}>Did the trading change what you wanted or valued?</label>
+          {optionalHint}
           <div className="flex gap-4">
             <button
               onClick={() => update("didMindChange", true)}
@@ -87,10 +71,10 @@ const Debrief = ({ dealtPlayerHand, debriefAnswers, setDebriefAnswers, onContinu
           </div>
         </motion.div>
 
-        {/* Q4 conditional */}
         {debriefAnswers.didMindChange && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
             <label className={labelClass}>What shifted for you?</label>
+            {optionalHint}
             <textarea
               className={inputClass}
               rows={3}
@@ -100,9 +84,9 @@ const Debrief = ({ dealtPlayerHand, debriefAnswers, setDebriefAnswers, onContinu
           </motion.div>
         )}
 
-        {/* Q5 */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <label className={labelClass}>What did you learn about your partners' values?</label>
+          {optionalHint}
           <textarea
             className={inputClass}
             rows={3}
@@ -111,9 +95,9 @@ const Debrief = ({ dealtPlayerHand, debriefAnswers, setDebriefAnswers, onContinu
           />
         </motion.div>
 
-        {/* Q6 */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
           <label className={labelClass}>Was there any hidden common ground you didn't expect?</label>
+          {optionalHint}
           <textarea
             className={inputClass}
             rows={3}
@@ -122,12 +106,10 @@ const Debrief = ({ dealtPlayerHand, debriefAnswers, setDebriefAnswers, onContinu
           />
         </motion.div>
 
-        {error && <p className="text-destructive text-sm font-sans">{error}</p>}
-
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={handleSubmit}
+          onClick={() => onContinue()}
           className="w-full py-4 bg-primary text-primary-foreground font-sans font-bold rounded-xl"
         >
           See your summary →

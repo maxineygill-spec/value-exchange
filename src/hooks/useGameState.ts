@@ -68,6 +68,15 @@ const PHASE_ORDER: GamePhase[] = [
 export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
   const [phase, setPhase] = useState<GamePhase>("mode-select");
   const [deckSize, setDeckSize] = useState<18 | 24>(18);
+  const [phaseStartTime, setPhaseStartTime] = useState<number>(Date.now());
+  const [phaseTiming, setPhaseTiming] = useState<Record<string, number>>({});
+
+  const advancePhase = useCallback((next: GamePhase) => {
+    const elapsed = Date.now() - phaseStartTime;
+    setPhaseTiming(prev => ({ ...prev, [phase]: elapsed }));
+    setPhaseStartTime(Date.now());
+    setPhase(next);
+  }, [phase, phaseStartTime]);
 
   const [dealtPlayerHand, setDealtPlayerHand] = useState<Value[]>([]);
   const [playerHand, setPlayerHand] = useState<Value[]>([]);
@@ -75,7 +84,7 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
   const [trades, setTrades] = useState<TradeRecord[]>([]);
 
   const [finalTop, setFinalTop] = useState<string[]>([]);
-  const [finalTopReason, setFinalTopReason] = useState("");
+
 
   const [debriefAnswers, setDebriefAnswers] = useState<DebriefAnswers>({
     hardestToGiveUp: "",
@@ -91,7 +100,7 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
 
   // Spec 1d: top 2 from a hand of 6 (18-deck) / top 3 from a hand of 8 (24-deck).
   // (Condition 2 prose says a flat "top 3" — to use that, set topN = 3.)
-  const topN = deckSize === 18 ? 2 : 3;
+  const topN = 3;
 
   const partnerProfiles = PARTNER_DISPLAY;
 
@@ -180,7 +189,8 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
     setPartners([]);
     setTrades([]);
     setFinalTop([]);
-    setFinalTopReason("");
+    setPhaseStartTime(Date.now());
+    setPhaseTiming({});
     setDebriefAnswers({
       hardestToGiveUp: "",
       whyHardest: "",
@@ -209,7 +219,8 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
       dealtHand: dealtPlayerHand.map((v) => v.name),
       trades,
       finalHand: playerHand.map((v) => v.name),
-      topSelection: { n: topN, values: finalTop, reason: finalTopReason },
+      topSelection: { n: topN, values: finalTop },
+      timing: phaseTiming,
       debrief: {
         hardestToGiveUp: debriefAnswers.hardestToGiveUp,
         whyHardest: debriefAnswers.whyHardest,
@@ -227,15 +238,16 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
     link.download = `value-cards-session-${Date.now()}.json`;
     link.click();
     URL.revokeObjectURL(url);
-  }, [deckSize, partners, dealtPlayerHand, trades, playerHand, topN, finalTop, finalTopReason, debriefAnswers]);
+  }, [deckSize, partners, dealtPlayerHand, trades, playerHand, topN, finalTop, debriefAnswers, phaseTiming]);
 
   return {
-    phase, setPhase, phaseIndex, totalPhases,
+    phase, setPhase, advancePhase, phaseIndex, totalPhases,
+    phaseTiming, phaseStartTime,
     deckSize, setDeckSize,
     dealtPlayerHand, playerHand,
     partners, partnerProfiles, partnerMaxedOut,
     trades,
-    topN, finalTop, toggleTop, finalTopReason, setFinalTopReason,
+    topN, finalTop, toggleTop,
     debriefAnswers, setDebriefAnswers,
     dealCards, makeOffer, canFinishTrading,
     resetGame, exportData,
