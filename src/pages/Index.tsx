@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useGameState } from '../hooks/useGameState';
 import ProgressBar from '../components/ProgressBar';
 import ModeSelect from '../screens/ModeSelect';
@@ -8,6 +9,7 @@ import Trade from '../screens/Trade';
 import Sort from '../screens/Sort';
 import Debrief from '../screens/Debrief';
 import Summary from '../screens/Summary';
+import ResearcherView from '../screens/ResearcherView';
 
 const PHASE_LABELS: Record<string, string> = {
   "glossary": "Overview",
@@ -21,6 +23,18 @@ const PHASE_LABELS: Record<string, string> = {
 
 const Index = () => {
   const game = useGameState();
+  const [showResearcher, setShowResearcher] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'R' || e.key === 'r')) {
+        e.preventDefault();
+        setShowResearcher(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const renderScreen = () => {
     switch (game.phase) {
@@ -29,19 +43,19 @@ const Index = () => {
           <ModeSelect
             deckSize={game.deckSize}
             setDeckSize={game.setDeckSize}
-            onStart={() => game.setPhase("glossary")}
+            onStart={() => game.advancePhase("glossary")}
           />
         );
       case "glossary":
         return <Glossary deckSize={game.deckSize} onContinue={() => game.dealCards()} />;
       case "deal":
-        return <Deal playerHand={game.playerHand} onContinue={() => game.setPhase("meet-partners")} />;
+        return <Deal playerHand={game.playerHand} onContinue={() => game.advancePhase("meet-partners")} />;
       case "meet-partners":
         return (
           <MeetPartners
             partners={game.partners}
             partnerProfiles={game.partnerProfiles}
-            onContinue={() => game.setPhase("trade")}
+            onContinue={() => game.advancePhase("trade")}
           />
         );
       case "trade":
@@ -53,7 +67,7 @@ const Index = () => {
             makeOffer={game.makeOffer}
             canFinishTrading={game.canFinishTrading}
             partnerMaxedOut={game.partnerMaxedOut}
-            onContinue={() => game.setPhase("sort")}
+            onContinue={() => game.advancePhase("sort")}
           />
         );
       case "sort":
@@ -63,9 +77,7 @@ const Index = () => {
             topN={game.topN}
             finalTop={game.finalTop}
             toggleTop={game.toggleTop}
-            finalTopReason={game.finalTopReason}
-            setFinalTopReason={game.setFinalTopReason}
-            onContinue={() => game.setPhase("debrief")}
+            onContinue={() => game.advancePhase("debrief")}
           />
         );
       case "debrief":
@@ -74,7 +86,7 @@ const Index = () => {
             dealtPlayerHand={game.dealtPlayerHand}
             debriefAnswers={game.debriefAnswers}
             setDebriefAnswers={game.setDebriefAnswers}
-            onContinue={() => game.setPhase("summary")}
+            onContinue={() => game.advancePhase("summary")}
           />
         );
       case "summary":
@@ -106,6 +118,20 @@ const Index = () => {
         />
       )}
       {renderScreen()}
+      {showResearcher && (
+        <ResearcherView
+          phase={game.phase}
+          phaseTiming={game.phaseTiming}
+          phaseStartTime={game.phaseStartTime}
+          deckSize={game.deckSize}
+          partners={game.partners}
+          partnerProfiles={game.partnerProfiles}
+          playerHand={game.playerHand}
+          dealtPlayerHand={game.dealtPlayerHand}
+          trades={game.trades}
+          onClose={() => setShowResearcher(false)}
+        />
+      )}
     </div>
   );
 };
