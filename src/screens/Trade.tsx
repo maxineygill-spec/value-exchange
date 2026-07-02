@@ -189,6 +189,7 @@ const Trade = ({
             <div className="grid grid-cols-2 gap-3">
               {partner?.hand.map((v, i) => {
                 const locked = lockedHere.includes(v.name);
+                const selected = get === v.name;
                 return (
                   <ValueCard
                     key={v.name}
@@ -196,8 +197,9 @@ const Trade = ({
                     size="sm"
                     index={i}
                     isPlayer={false}
-                    isSelected={get === v.name}
-                    isDimmed={locked}
+                    isSelected={selected}
+                    showCheckmark={selected}
+                    isDimmed={locked || maxedOut}
                     onClick={!locked && !maxedOut ? () => setGet(v.name) : undefined}
                   />
                 );
