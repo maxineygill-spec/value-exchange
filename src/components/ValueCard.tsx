@@ -12,6 +12,7 @@ interface ValueCardProps {
   size?: 'sm' | 'md' | 'lg';
   index?: number;
   showShake?: boolean;
+  showCheckmark?: boolean;
 }
 
 const ValueCard = ({
@@ -25,6 +26,7 @@ const ValueCard = ({
   size = 'md',
   index = 0,
   showShake,
+  showCheckmark,
 }: ValueCardProps) => {
   const sizeClasses = {
     sm: "w-28 h-36 p-3 sm:w-32 sm:h-44",
@@ -45,38 +47,40 @@ const ValueCard = ({
     );
   }
 
+  const dimmed = isDimmed;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08, duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-      whileHover={onClick ? { y: -5, transition: { duration: 0.2 } } : undefined}
-      whileTap={onClick ? { scale: 0.98 } : undefined}
-      onClick={onClick}
+      whileHover={onClick && !dimmed ? { y: -5, transition: { duration: 0.2 } } : undefined}
+      whileTap={onClick && !dimmed ? { scale: 0.98 } : undefined}
+      onClick={dimmed ? undefined : onClick}
       className={`
         relative flex flex-col justify-between rounded-2xl transition-shadow duration-300 select-none
         ${sizeClasses[size]}
         ${isPlayer ? 'bg-card-player text-card-foreground' : 'bg-card-npc text-card-foreground'}
-        ${isTop2
-          ? 'ring-4 ring-primary/50 glow-gold scale-105 z-10'
-          : isSelected
-            ? 'ring-2 ring-primary card-shadow-hover'
-            : 'card-shadow'}
-        ${isDimmed ? 'opacity-40 grayscale-[0.5]' : 'opacity-100'}
-        ${onClick ? 'cursor-pointer' : 'cursor-default'}
+        ${isSelected ? 'ring-2 ring-primary bg-primary/10 card-shadow-hover' : isTop2 ? 'ring-4 ring-primary/50 glow-gold scale-105 z-10' : 'card-shadow'}
+        ${dimmed ? 'opacity-40 grayscale-[0.5] cursor-not-allowed pointer-events-none' : 'opacity-100'}
+        ${onClick && !dimmed ? 'cursor-pointer' : 'cursor-default'}
         ${showShake ? 'animate-shake' : ''}
       `}
     >
+      {showCheckmark && (
+        <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-5 h-5 text-xs flex items-center justify-center shadow z-20">
+          ✓
+        </div>
+      )}
       <div className="flex justify-between items-start">
         <h3 className={`font-serif font-bold leading-tight ${size === 'sm' ? 'text-sm' : size === 'md' ? 'text-lg' : 'text-2xl'}`}>
           {value.name}
         </h3>
-        {isTop2 && <span className="text-primary text-lg">★</span>}
+        {isTop2 && !isSelected && <span className="text-primary text-lg">★</span>}
       </div>
       <p className={`font-sans leading-relaxed ${isPlayer ? 'text-card-foreground/60' : 'text-card-foreground/60'} ${size === 'sm' ? 'text-[10px]' : 'text-xs'}`}>
         {value.definition}
       </p>
-      {/* Paper texture overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03] rounded-2xl bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMwMDAiIG9wYWNpdHk9IjAuMDUiLz48L3N2Zz4=')]" />
     </motion.div>
   );
