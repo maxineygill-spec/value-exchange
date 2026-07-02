@@ -84,7 +84,7 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
   const [trades, setTrades] = useState<TradeRecord[]>([]);
 
   const [finalTop, setFinalTop] = useState<string[]>([]);
-  const [finalTopReason, setFinalTopReason] = useState("");
+
 
   const [debriefAnswers, setDebriefAnswers] = useState<DebriefAnswers>({
     hardestToGiveUp: "",
