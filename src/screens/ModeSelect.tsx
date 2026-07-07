@@ -19,7 +19,7 @@ const ModeSelect = ({ deckSize, setDeckSize, onStart }: ModeSelectProps) => {
           Value Cards
         </h1>
         <p className="text-muted-foreground text-lg font-sans">
-          A negotiation game about what matters
+          Discover what matters to you.
         </p>
       </motion.div>
 
