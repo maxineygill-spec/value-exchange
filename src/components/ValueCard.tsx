@@ -33,13 +33,13 @@ const ValueCard = ({
   const [flipped, setFlipped] = useState(false);
 
   const sizeClasses = {
-    sm: 'w-24 h-24 p-2 text-xs',
-    md: 'w-28 h-28 p-2.5 text-sm sm:w-32 sm:h-32',
-    lg: 'w-32 h-32 p-3 text-base sm:w-36 sm:h-36',
+    sm: 'w-28 h-28 p-2.5 text-xs sm:w-32 sm:h-32',
+    md: 'w-32 h-32 p-3 text-sm sm:w-36 sm:h-36',
+    lg: 'w-36 h-36 p-3.5 text-base sm:w-40 sm:h-40',
   };
 
   const titleSize = {
-    sm: 'text-xs',
+    sm: 'text-xs sm:text-sm',
     md: 'text-sm sm:text-base',
     lg: 'text-base sm:text-lg',
   };
