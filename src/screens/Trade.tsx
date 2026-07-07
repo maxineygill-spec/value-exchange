@@ -68,7 +68,7 @@ const Trade = ({
         <div className="text-center mb-6">
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground mb-2">Trade</h1>
           <p className="text-muted-foreground font-sans text-sm mb-4">
-            Trade with both partners. Keep going as long as they'll deal — push each as far as it will go.
+            You must trade at least one card with each partner. You may trade until you're happy with your hand.
           </p>
           <div className="flex items-center justify-center gap-3">
             {partners.map((p, i) => (
@@ -81,11 +81,12 @@ const Trade = ({
                     : 'bg-muted border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
-                {partnerProfiles[i]?.avatar} {partnerProfiles[i]?.name}{" "}
+                {partnerProfiles[i]?.name}{" "}
                 {p.successes > 0 ? "✓" : "○"}
               </button>
             ))}
           </div>
+
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
