@@ -118,7 +118,7 @@ export function buildSolvableRanking(
 ): Ranking {
   const ranking = buildRanking(allValues, rng);
   const probe: PartnerState = {
-    id: "probe", hand: partnerHand, ranking, offersMade: 0, successes: 0, lockedCards: [],
+    id: "probe", hand: partnerHand, ranking, offersMade: 0, successes: 0, lockedPairs: [],
   };
   if (hasAcceptableTrade(playerHand, probe)) return ranking;
 
