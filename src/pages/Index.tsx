@@ -119,6 +119,13 @@ const Index = () => {
         />
       )}
       {renderScreen()}
+      <button
+        onClick={() => setShowResearcher(true)}
+        className="fixed bottom-3 right-3 z-40 text-[10px] uppercase tracking-widest text-muted-foreground/60 hover:text-primary bg-muted/40 hover:bg-muted border border-border rounded-full px-3 py-1.5 font-sans transition-colors"
+        title="Researcher view (Ctrl/Cmd+Shift+D)"
+      >
+        Researcher
+      </button>
       {showResearcher && (
         <ResearcherView
           phase={game.phase}
@@ -133,6 +140,7 @@ const Index = () => {
           onClose={() => setShowResearcher(false)}
         />
       )}
+
     </div>
   );
 };
