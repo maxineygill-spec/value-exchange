@@ -15,9 +15,9 @@ const MeetPartners = ({ partners, partnerProfiles, onContinue }: MeetPartnersPro
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-10 max-w-lg"
+        className="text-center mb-8 max-w-lg"
       >
-        <h1 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-3">
+        <h1 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-2">
           Your Trading Partners
         </h1>
         <p className="text-muted-foreground font-sans">
@@ -26,7 +26,7 @@ const MeetPartners = ({ partners, partnerProfiles, onContinue }: MeetPartnersPro
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full mb-10">
         {partners.map((p, i) => (
           <motion.div
             key={p.id}
@@ -39,7 +39,7 @@ const MeetPartners = ({ partners, partnerProfiles, onContinue }: MeetPartnersPro
               <h2 className="text-xl font-serif font-bold text-foreground">{partnerProfiles[i]?.name}</h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-4">
               {p.hand.map((v, j) => (
                 <ValueCard key={v.name} value={v} size="sm" index={j} isPlayer={false} />
               ))}
