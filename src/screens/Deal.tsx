@@ -15,7 +15,7 @@ const Deal = ({ playerHand, onContinue }: DealProps) => {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-8"
       >
-        <h1 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-3">
+        <h1 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-2">
           Your Hand
         </h1>
       </motion.div>
@@ -30,7 +30,7 @@ const Deal = ({ playerHand, onContinue }: DealProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: playerHand.length * 0.08 + 0.3 }}
-        className="text-muted-foreground text-center max-w-md mb-8 font-sans"
+        className="text-muted-foreground text-center max-w-md mb-10 font-sans"
       >
         These values have been randomly dealt to you. Take a moment to look over them.
       </motion.p>

@@ -13,9 +13,9 @@ const ModeSelect = ({ deckSize, setDeckSize, onStart }: ModeSelectProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-        className="text-center mb-12"
+        className="text-center mb-8"
       >
-        <h1 className="text-4xl sm:text-5xl font-serif font-bold text-foreground mb-3">
+        <h1 className="text-4xl sm:text-5xl font-serif font-bold text-foreground mb-2">
           Value Cards
         </h1>
         <p className="text-muted-foreground text-lg font-sans">
@@ -30,7 +30,7 @@ const ModeSelect = ({ deckSize, setDeckSize, onStart }: ModeSelectProps) => {
         whileHover={{ y: -4 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setDeckSize(18)}
-        className={`bg-card-player text-card-foreground rounded-2xl p-6 card-shadow text-left transition-all hover:card-shadow-hover w-full max-w-sm ${
+        className={`bg-card-player text-card-foreground rounded-2xl p-6 card-shadow text-left transition-all hover:card-shadow-hover w-full max-w-sm mb-10 ${
           deckSize === 18 ? 'ring-2 ring-primary' : ''
         }`}
       >
@@ -46,7 +46,7 @@ const ModeSelect = ({ deckSize, setDeckSize, onStart }: ModeSelectProps) => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.5 }}
         onClick={onStart}
-        className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-sans text-sm hover:opacity-90 transition-opacity"
+        className="px-8 py-4 rounded-xl bg-primary text-primary-foreground font-sans font-semibold hover:opacity-90 transition-opacity"
       >
         Start
       </motion.button>

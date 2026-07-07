@@ -17,7 +17,7 @@ const Glossary = ({ deckSize, onContinue }: GlossaryProps) => {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-8 max-w-lg"
       >
-        <h1 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-3">
+        <h1 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-2">
           The Values at Play
         </h1>
         <p className="text-muted-foreground font-sans">
@@ -27,7 +27,7 @@ const Glossary = ({ deckSize, onContinue }: GlossaryProps) => {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-10 max-w-5xl">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 mb-10 max-w-5xl">
         {values.map((value, i) => (
           <ValueCard key={value.name} value={value} size="sm" index={i} />
         ))}
