@@ -62,7 +62,7 @@ const Summary = ({
           </div>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-10">
           <h2 className="text-lg font-serif font-bold text-foreground mb-4">What you reflected on</h2>
           <div className="space-y-3 text-sm font-sans">
             <div>
