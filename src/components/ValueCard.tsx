@@ -110,12 +110,13 @@ const ValueCard = ({
           onClick={handleFlip}
           className={`
             absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]
-            flex items-center justify-center rounded-xl cursor-pointer p-3
+            flex flex-col items-center justify-center rounded-xl cursor-pointer p-4
+            overflow-hidden
             ${isPlayer ? 'bg-card-player text-card-foreground' : 'bg-card-npc text-card-foreground'}
             card-shadow
           `}
         >
-          <p className="font-sans leading-snug text-center text-card-foreground/90 text-xs sm:text-sm overflow-y-auto">
+          <p className="font-sans leading-snug text-center text-card-foreground/90 text-xs sm:text-sm max-h-full overflow-y-auto">
             {value.definition}
           </p>
         </div>
