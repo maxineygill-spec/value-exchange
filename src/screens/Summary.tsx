@@ -24,7 +24,7 @@ const Summary = ({
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-12">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-xl">
-        <div className="bg-muted border border-border rounded-2xl p-6 sm:p-8 mb-8">
+        <div className="bg-muted border border-border rounded-2xl p-6 sm:p-8 mb-10">
           <h1 className="text-2xl font-serif font-bold text-foreground mb-6">Your Values Session</h1>
 
           <div className="space-y-4 text-sm font-sans">
