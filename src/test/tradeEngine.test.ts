@@ -152,7 +152,9 @@ describe("trade simulation", () => {
       const { partners, handSize, playerHand } = simulate(24, seed);
       expect(playerHand).toHaveLength(handSize);
       for (const p of partners) {
-        expect(new Set(p.lockedCards).size).toBe(p.lockedCards.length);
+        const keys = p.lockedPairs.map((lp) => `${lp.give}->${lp.get}`);
+        expect(new Set(keys).size).toBe(keys.length);
+
       }
       expect(canFinishTrading(playerHand, partners, DEFAULT_TRADE_CONFIG)).toBe(true);
     }
