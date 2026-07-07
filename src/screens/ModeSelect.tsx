@@ -23,28 +23,23 @@ const ModeSelect = ({ deckSize, setDeckSize, onStart }: ModeSelectProps) => {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10 max-w-lg w-full">
-        {([18, 24] as const).map((size, i) => (
-          <motion.button
-            key={size}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 + i * 0.1, duration: 0.5 }}
-            whileHover={{ y: -4 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setDeckSize(size)}
-            className={`bg-card-player text-card-foreground rounded-2xl p-6 card-shadow text-left transition-all hover:card-shadow-hover ${
-              deckSize === size ? 'ring-2 ring-primary' : ''
-            }`}
-          >
-            <div className="text-2xl mb-2">🃏</div>
-            <h2 className="font-serif font-bold text-xl mb-2">{size} cards</h2>
-            <p className="text-card-foreground/60 text-sm font-sans">
-              {size === 18 ? 'Shorter game, focused choices' : 'Longer game, wider exploration'}
-            </p>
-          </motion.button>
-        ))}
-      </div>
+      <motion.button
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.5 }}
+        whileHover={{ y: -4 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => setDeckSize(18)}
+        className={`bg-card-player text-card-foreground rounded-2xl p-6 card-shadow text-left transition-all hover:card-shadow-hover w-full max-w-sm ${
+          deckSize === 18 ? 'ring-2 ring-primary' : ''
+        }`}
+      >
+        <div className="text-2xl mb-2">🃏</div>
+        <h2 className="font-serif font-bold text-xl mb-2">18 cards</h2>
+        <p className="text-card-foreground/60 text-sm font-sans">
+          Shorter game, focused choices
+        </p>
+      </motion.button>
 
       <motion.button
         initial={{ opacity: 0 }}
