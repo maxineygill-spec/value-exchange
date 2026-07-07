@@ -78,20 +78,31 @@ export function buildRanking(values: Value[], rng: () => number = Math.random): 
   return ranking;
 }
 
-/** Does any acceptable (unlocked) trade exist between this hand and partner? */
+/** Would this (give, get) reverse an already-completed trade with this partner? */
+function isReverseLocked(
+  partner: PartnerState,
+  giveName: string,
+  getName: string
+): boolean {
+  return partner.lockedPairs.some(
+    (p) => p.give === getName && p.get === giveName
+  );
+}
+
+/** Does any acceptable, non-reverse trade exist between this hand and partner? */
 export function hasAcceptableTrade(
   playerHand: Value[],
   partner: PartnerState
 ): boolean {
   for (const g of playerHand) {
-    if (partner.lockedCards.includes(g.name)) continue;
     for (const r of partner.hand) {
-      if (partner.lockedCards.includes(r.name)) continue;
+      if (isReverseLocked(partner, g.name, r.name)) continue;
       if (partner.ranking[g.name] < partner.ranking[r.name]) return true;
     }
   }
   return false;
 }
+
 
 /**
  * Build a ranking that is GUARANTEED to leave at least one acceptable trade
