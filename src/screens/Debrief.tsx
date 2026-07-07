@@ -1,15 +1,14 @@
 import { motion } from 'framer-motion';
-import { Value } from '../data/values';
 import { DebriefAnswers } from '../hooks/useGameState';
 
 interface DebriefProps {
-  dealtPlayerHand: Value[];
+  selectableCards: string[];
   debriefAnswers: DebriefAnswers;
   setDebriefAnswers: (answers: DebriefAnswers) => void;
   onContinue: () => void;
 }
 
-const Debrief = ({ dealtPlayerHand, debriefAnswers, setDebriefAnswers, onContinue }: DebriefProps) => {
+const Debrief = ({ selectableCards, debriefAnswers, setDebriefAnswers, onContinue }: DebriefProps) => {
   const update = (key: keyof DebriefAnswers, value: string | boolean) => {
     setDebriefAnswers({ ...debriefAnswers, [key]: value });
   };
@@ -35,8 +34,8 @@ const Debrief = ({ dealtPlayerHand, debriefAnswers, setDebriefAnswers, onContinu
             className={inputClass}
           >
             <option value="">Select a card...</option>
-            {dealtPlayerHand.map(v => (
-              <option key={v.name} value={v.name}>{v.name}</option>
+            {selectableCards.map(name => (
+              <option key={name} value={name}>{name}</option>
             ))}
           </select>
         </motion.div>
