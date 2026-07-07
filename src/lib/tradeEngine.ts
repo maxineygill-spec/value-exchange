@@ -33,12 +33,13 @@ export interface PartnerState {
   offersMade: number;
   successes: number;
   /**
-   * Card names already traded with this partner (either direction). Locked from
-   * trading with this partner again — prevents re-trading received cards and
-   * any ping-pong. (The ranking rule already forbids ping-pong, but this is an
-   * explicit guard.)
+   * Pairs (give, get) from past accepted trades with this partner. Prevents
+   * only the exact reverse trade — e.g. after trading Creativity→Purity, you
+   * cannot immediately trade Purity→Creativity back to the same partner. All
+   * other trades involving those cards remain available.
    */
-  lockedCards: string[];
+  lockedPairs: Array<{ give: string; get: string }>;
+
 }
 
 export type OfferValidation = { ok: true } | { ok: false; reason: string };
@@ -77,20 +78,31 @@ export function buildRanking(values: Value[], rng: () => number = Math.random): 
   return ranking;
 }
 
-/** Does any acceptable (unlocked) trade exist between this hand and partner? */
+/** Would this (give, get) reverse an already-completed trade with this partner? */
+function isReverseLocked(
+  partner: PartnerState,
+  giveName: string,
+  getName: string
+): boolean {
+  return partner.lockedPairs.some(
+    (p) => p.give === getName && p.get === giveName
+  );
+}
+
+/** Does any acceptable, non-reverse trade exist between this hand and partner? */
 export function hasAcceptableTrade(
   playerHand: Value[],
   partner: PartnerState
 ): boolean {
   for (const g of playerHand) {
-    if (partner.lockedCards.includes(g.name)) continue;
     for (const r of partner.hand) {
-      if (partner.lockedCards.includes(r.name)) continue;
+      if (isReverseLocked(partner, g.name, r.name)) continue;
       if (partner.ranking[g.name] < partner.ranking[r.name]) return true;
     }
   }
   return false;
 }
+
 
 /**
  * Build a ranking that is GUARANTEED to leave at least one acceptable trade
@@ -106,7 +118,7 @@ export function buildSolvableRanking(
 ): Ranking {
   const ranking = buildRanking(allValues, rng);
   const probe: PartnerState = {
-    id: "probe", hand: partnerHand, ranking, offersMade: 0, successes: 0, lockedCards: [],
+    id: "probe", hand: partnerHand, ranking, offersMade: 0, successes: 0, lockedPairs: [],
   };
   if (hasAcceptableTrade(playerHand, probe)) return ranking;
 
@@ -122,7 +134,7 @@ export function buildSolvableRanking(
 }
 
 export function makePartner(id: string, hand: Value[], ranking: Ranking): PartnerState {
-  return { id, hand, ranking, offersMade: 0, successes: 0, lockedCards: [] };
+  return { id, hand, ranking, offersMade: 0, successes: 0, lockedPairs: [] };
 }
 
 /** Can this specific offer legally be made? (Legality, not acceptance.) */
@@ -138,8 +150,9 @@ export function validateOffer(
     return { ok: false, reason: "You no longer hold that card." };
   if (!partner.hand.some((v) => v.name === getName))
     return { ok: false, reason: "They no longer hold that card." };
-  if (partner.lockedCards.includes(giveName) || partner.lockedCards.includes(getName))
-    return { ok: false, reason: "That card has already been traded with this partner." };
+  if (isReverseLocked(partner, giveName, getName))
+    return { ok: false, reason: "You can't immediately reverse the trade you just made with this partner." };
+
   return { ok: true };
 }
 
@@ -171,7 +184,7 @@ export function applyAcceptedTrade(
       hand: partner.hand.filter((v) => v.name !== getName).concat(giveCard),
       offersMade: partner.offersMade + 1,
       successes: partner.successes + 1,
-      lockedCards: [...partner.lockedCards, giveName, getName],
+      lockedPairs: [...partner.lockedPairs, { give: giveName, get: getName }],
     },
   };
 }

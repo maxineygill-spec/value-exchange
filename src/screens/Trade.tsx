@@ -43,7 +43,9 @@ const Trade = ({
     setError("");
   };
 
-  const lockedHere = partner?.lockedCards ?? [];
+  // With pair-level locking, no individual card is ever locked — only the
+  // exact reverse of a just-completed trade is blocked (handled by validateOffer).
+
 
   const handleOffer = () => {
     if (!give || !get) {
@@ -97,7 +99,6 @@ const Trade = ({
             </span>
             <div className="grid grid-cols-2 gap-3">
               {playerHand.map((v, i) => {
-                const locked = lockedHere.includes(v.name);
                 const selected = give === v.name;
                 return (
                   <ValueCard
@@ -107,11 +108,12 @@ const Trade = ({
                     index={i}
                     isSelected={selected}
                     showCheckmark={selected}
-                    isDimmed={locked || maxedOut}
-                    onClick={!locked && !maxedOut ? () => setGive(selected ? null : v.name) : undefined}
+                    isDimmed={maxedOut}
+                    onClick={!maxedOut ? () => setGive(selected ? null : v.name) : undefined}
                   />
                 );
               })}
+
             </div>
           </div>
 
@@ -189,7 +191,6 @@ const Trade = ({
             </div>
             <div className="grid grid-cols-2 gap-3">
               {partner?.hand.map((v, i) => {
-                const locked = lockedHere.includes(v.name);
                 const selected = get === v.name;
                 return (
                   <ValueCard
@@ -200,11 +201,12 @@ const Trade = ({
                     isPlayer={false}
                     isSelected={selected}
                     showCheckmark={selected}
-                    isDimmed={locked || maxedOut}
-                    onClick={!locked && !maxedOut ? () => setGet(selected ? null : v.name) : undefined}
+                    isDimmed={maxedOut}
+                    onClick={!maxedOut ? () => setGet(selected ? null : v.name) : undefined}
                   />
                 );
               })}
+
             </div>
           </div>
         </div>

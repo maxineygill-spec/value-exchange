@@ -49,7 +49,8 @@ describe("deterministic acceptance (the spec rule)", () => {
     };
     const partner: PartnerState = {
       id: "A", hand: byName(["Happiness"]), ranking,
-      offersMade: 0, successes: 0, lockedCards: [],
+      offersMade: 0, successes: 0, lockedPairs: [],
+
     };
     // Offer Freedom (4) for Happiness (5): 4 < 5 -> accept.
     expect(decideOffer(partner, "Freedom", "Happiness")).toBe(true);
@@ -60,7 +61,7 @@ describe("deterministic acceptance (the spec rule)", () => {
   it("is adamant: a rejected offer stays rejected no matter how many times it's tried", () => {
     let partner: PartnerState = {
       id: "A", hand: byName(["Happiness"]), ranking: { Order: 6, Happiness: 5 },
-      offersMade: 0, successes: 0, lockedCards: [],
+      offersMade: 0, successes: 0, lockedPairs: [],
     };
     for (let i = 0; i < 25; i++) {
       const accepted = decideOffer(partner, "Order", "Happiness");
@@ -110,9 +111,12 @@ function simulate(deckSize: 18 | 24, seed: number) {
     // Find an acceptable, legal trade.
     let made = false;
     for (const g of playerHand) {
-      if (partner.lockedCards.includes(g.name)) continue;
       for (const r of partner.hand) {
-        if (partner.lockedCards.includes(r.name)) continue;
+        const isReverse = partner.lockedPairs.some(
+          (lp) => lp.give === r.name && lp.get === g.name
+        );
+        if (isReverse) continue;
+
         if (decideOffer(partner, g.name, r.name)) {
           expect(validateOffer(playerHand, partner, g.name, r.name).ok).toBe(true);
           const res = applyAcceptedTrade(playerHand, partner, g.name, r.name);
@@ -148,7 +152,9 @@ describe("trade simulation", () => {
       const { partners, handSize, playerHand } = simulate(24, seed);
       expect(playerHand).toHaveLength(handSize);
       for (const p of partners) {
-        expect(new Set(p.lockedCards).size).toBe(p.lockedCards.length);
+        const keys = p.lockedPairs.map((lp) => `${lp.give}->${lp.get}`);
+        expect(new Set(keys).size).toBe(keys.length);
+
       }
       expect(canFinishTrading(playerHand, partners, DEFAULT_TRADE_CONFIG)).toBe(true);
     }
