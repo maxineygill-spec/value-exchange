@@ -20,7 +20,7 @@ const Deal = ({ playerHand, onContinue }: DealProps) => {
         </h1>
       </motion.div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 max-w-2xl">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-10 max-w-3xl">
         {playerHand.map((value, i) => (
           <ValueCard key={value.name} value={value} size="md" index={i} />
         ))}

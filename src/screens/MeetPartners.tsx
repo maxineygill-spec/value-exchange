@@ -26,7 +26,7 @@ const MeetPartners = ({ partners, partnerProfiles, onContinue }: MeetPartnersPro
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl w-full mb-10">
         {partners.map((p, i) => (
           <motion.div
             key={p.id}
@@ -39,7 +39,7 @@ const MeetPartners = ({ partners, partnerProfiles, onContinue }: MeetPartnersPro
               <h2 className="text-xl font-serif font-bold text-foreground">{partnerProfiles[i]?.name}</h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {p.hand.map((v, j) => (
                 <ValueCard key={v.name} value={v} size="sm" index={j} isPlayer={false} />
               ))}

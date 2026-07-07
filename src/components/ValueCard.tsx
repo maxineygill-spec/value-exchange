@@ -33,13 +33,13 @@ const ValueCard = ({
   const [flipped, setFlipped] = useState(false);
 
   const sizeClasses = {
-    sm: 'w-24 h-24 p-2 text-xs',
-    md: 'w-28 h-28 p-2.5 text-sm sm:w-32 sm:h-32',
-    lg: 'w-32 h-32 p-3 text-base sm:w-36 sm:h-36',
+    sm: 'w-28 h-28 p-2.5 text-xs sm:w-32 sm:h-32',
+    md: 'w-32 h-32 p-3 text-sm sm:w-36 sm:h-36',
+    lg: 'w-36 h-36 p-3.5 text-base sm:w-40 sm:h-40',
   };
 
   const titleSize = {
-    sm: 'text-xs',
+    sm: 'text-xs sm:text-sm',
     md: 'text-sm sm:text-base',
     lg: 'text-base sm:text-lg',
   };
@@ -110,12 +110,13 @@ const ValueCard = ({
           onClick={handleFlip}
           className={`
             absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]
-            flex items-center justify-center rounded-xl cursor-pointer p-2
+            flex flex-col items-center justify-center rounded-xl cursor-pointer p-4
+            overflow-hidden
             ${isPlayer ? 'bg-card-player text-card-foreground' : 'bg-card-npc text-card-foreground'}
             card-shadow
           `}
         >
-          <p className={`font-sans leading-snug text-center text-card-foreground/80 ${size === 'sm' ? 'text-[10px]' : 'text-[11px] sm:text-xs'}`}>
+          <p className="font-sans leading-snug text-center text-card-foreground/90 text-xs sm:text-sm max-h-full overflow-y-auto">
             {value.definition}
           </p>
         </div>
