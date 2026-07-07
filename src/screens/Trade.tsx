@@ -43,7 +43,9 @@ const Trade = ({
     setError("");
   };
 
-  const lockedHere = partner?.lockedCards ?? [];
+  // With pair-level locking, no individual card is ever locked — only the
+  // exact reverse of a just-completed trade is blocked (handled by validateOffer).
+
 
   const handleOffer = () => {
     if (!give || !get) {
