@@ -33,12 +33,13 @@ export interface PartnerState {
   offersMade: number;
   successes: number;
   /**
-   * Card names already traded with this partner (either direction). Locked from
-   * trading with this partner again — prevents re-trading received cards and
-   * any ping-pong. (The ranking rule already forbids ping-pong, but this is an
-   * explicit guard.)
+   * Pairs (give, get) from past accepted trades with this partner. Prevents
+   * only the exact reverse trade — e.g. after trading Creativity→Purity, you
+   * cannot immediately trade Purity→Creativity back to the same partner. All
+   * other trades involving those cards remain available.
    */
-  lockedCards: string[];
+  lockedPairs: Array<{ give: string; get: string }>;
+
 }
 
 export type OfferValidation = { ok: true } | { ok: false; reason: string };
