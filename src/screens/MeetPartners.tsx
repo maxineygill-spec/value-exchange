@@ -36,9 +36,9 @@ const MeetPartners = ({ partners, partnerProfiles, onContinue }: MeetPartnersPro
             className="bg-muted/40 border border-border rounded-2xl p-5"
           >
             <div className="text-center mb-4">
-              <div className="text-4xl mb-1">{partnerProfiles[i]?.avatar}</div>
               <h2 className="text-xl font-serif font-bold text-foreground">{partnerProfiles[i]?.name}</h2>
             </div>
+
             <div className="grid grid-cols-2 gap-2">
               {p.hand.map((v, j) => (
                 <ValueCard key={v.name} value={v} size="sm" index={j} isPlayer={false} />
