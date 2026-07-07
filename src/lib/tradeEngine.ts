@@ -134,7 +134,7 @@ export function buildSolvableRanking(
 }
 
 export function makePartner(id: string, hand: Value[], ranking: Ranking): PartnerState {
-  return { id, hand, ranking, offersMade: 0, successes: 0, lockedCards: [] };
+  return { id, hand, ranking, offersMade: 0, successes: 0, lockedPairs: [] };
 }
 
 /** Can this specific offer legally be made? (Legality, not acceptance.) */
