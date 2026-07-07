@@ -49,7 +49,8 @@ describe("deterministic acceptance (the spec rule)", () => {
     };
     const partner: PartnerState = {
       id: "A", hand: byName(["Happiness"]), ranking,
-      offersMade: 0, successes: 0, lockedCards: [],
+      offersMade: 0, successes: 0, lockedPairs: [],
+
     };
     // Offer Freedom (4) for Happiness (5): 4 < 5 -> accept.
     expect(decideOffer(partner, "Freedom", "Happiness")).toBe(true);
