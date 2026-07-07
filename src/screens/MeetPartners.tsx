@@ -26,7 +26,7 @@ const MeetPartners = ({ partners, partnerProfiles, onContinue }: MeetPartnersPro
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl w-full mb-10">
         {partners.map((p, i) => (
           <motion.div
             key={p.id}
