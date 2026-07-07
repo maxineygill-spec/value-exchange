@@ -44,7 +44,7 @@ const Sort = ({
         </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 mb-10 max-w-2xl">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-10 max-w-3xl">
         {playerHand.map((value, i) => {
           const selected = finalTop.includes(value.name);
           return (
