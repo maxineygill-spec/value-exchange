@@ -184,7 +184,7 @@ export function applyAcceptedTrade(
       hand: partner.hand.filter((v) => v.name !== getName).concat(giveCard),
       offersMade: partner.offersMade + 1,
       successes: partner.successes + 1,
-      lockedCards: [...partner.lockedCards, giveName, getName],
+      lockedPairs: [...partner.lockedPairs, { give: giveName, get: getName }],
     },
   };
 }
