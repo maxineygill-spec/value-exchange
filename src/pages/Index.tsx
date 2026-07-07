@@ -27,7 +27,7 @@ const Index = () => {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'R' || e.key === 'r')) {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'D' || e.key === 'd' || e.key === 'R' || e.key === 'r')) {
         e.preventDefault();
         setShowResearcher(prev => !prev);
       }
@@ -35,6 +35,7 @@ const Index = () => {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+
 
   const renderScreen = () => {
     switch (game.phase) {
