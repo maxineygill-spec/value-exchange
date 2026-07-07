@@ -61,7 +61,7 @@ describe("deterministic acceptance (the spec rule)", () => {
   it("is adamant: a rejected offer stays rejected no matter how many times it's tried", () => {
     let partner: PartnerState = {
       id: "A", hand: byName(["Happiness"]), ranking: { Order: 6, Happiness: 5 },
-      offersMade: 0, successes: 0, lockedCards: [],
+      offersMade: 0, successes: 0, lockedPairs: [],
     };
     for (let i = 0; i < 25; i++) {
       const accepted = decideOffer(partner, "Order", "Happiness");
