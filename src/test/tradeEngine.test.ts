@@ -111,9 +111,12 @@ function simulate(deckSize: 18 | 24, seed: number) {
     // Find an acceptable, legal trade.
     let made = false;
     for (const g of playerHand) {
-      if (partner.lockedCards.includes(g.name)) continue;
       for (const r of partner.hand) {
-        if (partner.lockedCards.includes(r.name)) continue;
+        const isReverse = partner.lockedPairs.some(
+          (lp) => lp.give === r.name && lp.get === g.name
+        );
+        if (isReverse) continue;
+
         if (decideOffer(partner, g.name, r.name)) {
           expect(validateOffer(playerHand, partner, g.name, r.name).ok).toBe(true);
           const res = applyAcceptedTrade(playerHand, partner, g.name, r.name);
