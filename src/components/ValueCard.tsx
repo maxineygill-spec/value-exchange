@@ -97,9 +97,6 @@ const ValueCard = ({
           <h3 className={`font-serif font-bold leading-tight text-center ${titleSize[size]}`}>
             {value.name}
           </h3>
-          <span className="absolute bottom-1.5 left-0 right-0 text-center text-[9px] uppercase tracking-wider opacity-40 font-sans pointer-events-none">
-            tap ⓘ to flip
-          </span>
           <button
             onClick={handleFlip}
             aria-label="Show definition"
