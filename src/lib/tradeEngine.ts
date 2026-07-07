@@ -150,8 +150,9 @@ export function validateOffer(
     return { ok: false, reason: "You no longer hold that card." };
   if (!partner.hand.some((v) => v.name === getName))
     return { ok: false, reason: "They no longer hold that card." };
-  if (partner.lockedCards.includes(giveName) || partner.lockedCards.includes(getName))
-    return { ok: false, reason: "That card has already been traded with this partner." };
+  if (isReverseLocked(partner, giveName, getName))
+    return { ok: false, reason: "You can't immediately reverse the trade you just made with this partner." };
+
   return { ok: true };
 }
 
