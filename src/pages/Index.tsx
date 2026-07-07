@@ -84,7 +84,7 @@ const Index = () => {
       case "debrief":
         return (
           <Debrief
-            dealtPlayerHand={game.dealtPlayerHand}
+            selectableCards={game.finalTop}
             debriefAnswers={game.debriefAnswers}
             setDebriefAnswers={game.setDebriefAnswers}
             onContinue={() => game.advancePhase("summary")}

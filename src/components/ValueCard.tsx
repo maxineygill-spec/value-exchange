@@ -73,8 +73,9 @@ const ValueCard = ({
     >
       <motion.div
         animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-        className="relative w-full h-full [transform-style:preserve-3d]"
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        style={{ transformStyle: 'preserve-3d' }}
+        className="relative w-full h-full"
       >
         {/* FRONT */}
         <div
@@ -96,12 +97,15 @@ const ValueCard = ({
           <h3 className={`font-serif font-bold leading-tight text-center ${titleSize[size]}`}>
             {value.name}
           </h3>
+          <span className="absolute bottom-1.5 left-0 right-0 text-center text-[9px] uppercase tracking-wider opacity-40 font-sans pointer-events-none">
+            tap ⓘ to flip
+          </span>
           <button
             onClick={handleFlip}
             aria-label="Show definition"
-            className="absolute bottom-1 right-1 p-1 rounded-full hover:bg-black/10 transition"
+            className="absolute bottom-1 right-1 p-1 rounded-full hover:bg-black/10 transition-transform hover:scale-110"
           >
-            <Info className="w-3.5 h-3.5 opacity-50" />
+            <Info className="w-3.5 h-3.5 opacity-60" />
           </button>
         </div>
 
