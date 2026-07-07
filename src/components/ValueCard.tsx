@@ -61,7 +61,7 @@ const ValueCard = ({
         relative flex flex-col justify-between rounded-2xl transition-shadow duration-300 select-none
         ${sizeClasses[size]}
         ${isPlayer ? 'bg-card-player text-card-foreground' : 'bg-card-npc text-card-foreground'}
-        ${isSelected ? 'ring-2 ring-primary bg-primary/10 card-shadow-hover' : isTop2 ? 'ring-4 ring-primary/50 glow-gold scale-105 z-10' : 'card-shadow'}
+        ${isSelected ? 'ring-2 ring-primary brightness-110 glow-gold' : isTop2 ? 'ring-4 ring-primary/50 glow-gold scale-105 z-10' : 'card-shadow'}
         ${dimmed ? 'opacity-40 grayscale-[0.5] cursor-not-allowed pointer-events-none' : 'opacity-100'}
         ${onClick && !dimmed ? 'cursor-pointer' : 'cursor-default'}
         ${showShake ? 'animate-shake' : ''}
