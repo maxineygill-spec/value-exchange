@@ -108,7 +108,7 @@ const Trade = ({
                     isSelected={selected}
                     showCheckmark={selected}
                     isDimmed={locked || maxedOut}
-                    onClick={!locked && !maxedOut ? () => setGive(v.name) : undefined}
+                    onClick={!locked && !maxedOut ? () => setGive(selected ? null : v.name) : undefined}
                   />
                 );
               })}
