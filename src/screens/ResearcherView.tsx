@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Value } from '../data/values';
 import { PartnerState, Ranking } from '../lib/tradeEngine';
-import { GamePhase, PartnerDisplay, TradeRecord } from '../hooks/useGameState';
+import { GamePhase, PartnerDisplay, TradeRecord, Condition } from '../hooks/useGameState';
 
 interface ResearcherViewProps {
   phase: GamePhase;
   phaseTiming: Record<string, number>;
   phaseStartTime: number;
-  deckSize: 18 | 24;
+  condition: Condition;
   partners: PartnerState[];
   partnerProfiles: PartnerDisplay[];
   playerHand: Value[];
