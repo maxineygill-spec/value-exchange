@@ -67,10 +67,17 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
 
   const advancePhase = useCallback((next: GamePhase) => {
     const elapsed = Date.now() - phaseStartTime;
-    setPhaseTiming(prev => ({ ...prev, [phase]: elapsed }));
+    const newTiming = { ...phaseTiming, [phase]: elapsed };
+    setPhaseTiming(newTiming);
     setPhaseStartTime(Date.now());
     setPhase(next);
-  }, [phase, phaseStartTime]);
+    if (next === "summary") {
+      // fire-and-forget; saveSession reads latest state via closure below
+      queueMicrotask(() => saveSessionRef.current?.(newTiming));
+    }
+  }, [phase, phaseStartTime, phaseTiming]);
+
+  const saveSessionRef = { current: null as null | ((t: Record<string, number>) => void) };
 
   const [dealtPlayerHand, setDealtPlayerHand] = useState<Value[]>([]);
   const [playerHand, setPlayerHand] = useState<Value[]>([]);
