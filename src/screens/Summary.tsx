@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Value } from '../data/values';
-import { PartnerDisplay } from '../hooks/useGameState';
-import { DebriefAnswers, TradeRecord } from '../hooks/useGameState';
+import { PartnerDisplay, TradeRecord } from '../hooks/useGameState';
 
 interface SummaryProps {
   dealtPlayerHand: Value[];
@@ -10,14 +9,13 @@ interface SummaryProps {
   topN: number;
   partnerProfiles: PartnerDisplay[];
   trades: TradeRecord[];
-  debriefAnswers: DebriefAnswers;
   onExport: () => void;
   onPlayAgain: () => void;
 }
 
 const Summary = ({
   dealtPlayerHand, finalPlayerHand, finalTop, topN,
-  partnerProfiles, trades, debriefAnswers, onExport, onPlayAgain,
+  partnerProfiles, trades, onExport, onPlayAgain,
 }: SummaryProps) => {
   const successful = trades.filter((t) => t.accepted);
 
@@ -25,7 +23,7 @@ const Summary = ({
     <div className="min-h-screen flex flex-col items-center px-4 py-12">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-xl">
         <div className="bg-muted border border-border rounded-2xl p-6 sm:p-8 mb-10">
-          <h1 className="text-2xl font-serif font-bold text-foreground mb-6">Your Values Session</h1>
+          <h1 className="text-2xl font-serif font-bold text-foreground mb-6">Your Session</h1>
 
           <div className="space-y-4 text-sm font-sans">
             <div>
@@ -58,30 +56,6 @@ const Summary = ({
               <span>
                 {partnerProfiles.map((p) => `${p.avatar} ${p.name}`).join("  ·  ")}
               </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-10">
-          <h2 className="text-lg font-serif font-bold text-foreground mb-4">What you reflected on</h2>
-          <div className="space-y-3 text-sm font-sans">
-            <div>
-              <p className="text-muted-foreground">Hardest to give up:</p>
-              <p className="text-foreground">{debriefAnswers.hardestToGiveUp} — {debriefAnswers.whyHardest}</p>
-            </div>
-            {debriefAnswers.didMindChange && debriefAnswers.whatShifted && (
-              <div>
-                <p className="text-muted-foreground">What shifted:</p>
-                <p className="text-foreground">{debriefAnswers.whatShifted}</p>
-              </div>
-            )}
-            <div>
-              <p className="text-muted-foreground">Learned about partners:</p>
-              <p className="text-foreground">{debriefAnswers.learnedAboutPartner}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Hidden common ground:</p>
-              <p className="text-foreground">{debriefAnswers.hiddenCommonGround}</p>
             </div>
           </div>
         </div>
