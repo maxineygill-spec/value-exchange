@@ -58,6 +58,7 @@ const ValueCard = ({
   }
 
   const dimmed = isDimmed;
+  const hasDefinition = !!value.definition;
 
   const handleFlip = (e: React.MouseEvent) => {
     e.stopPropagation();
