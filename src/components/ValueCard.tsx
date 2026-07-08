@@ -98,30 +98,34 @@ const ValueCard = ({
           <h3 className={`font-serif font-bold leading-tight text-center ${titleSize[size]}`}>
             {value.name}
           </h3>
-          <button
-            onClick={handleFlip}
-            aria-label="Show definition"
-            className="absolute bottom-1 right-1 p-1 rounded-full hover:bg-black/10 transition-transform hover:scale-110"
-          >
-            <Info className="w-3.5 h-3.5 opacity-60" />
-          </button>
+          {hasDefinition && (
+            <button
+              onClick={handleFlip}
+              aria-label="Show definition"
+              className="absolute bottom-1 right-1 p-1 rounded-full hover:bg-black/10 transition-transform hover:scale-110"
+            >
+              <Info className="w-3.5 h-3.5 opacity-60" />
+            </button>
+          )}
         </div>
 
         {/* BACK */}
-        <div
-          onClick={handleFlip}
-          className={`
-            absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]
-            flex flex-col items-center justify-center rounded-xl cursor-pointer p-4
-            overflow-hidden
-            ${isPlayer ? 'bg-card-player text-card-foreground' : 'bg-card-npc text-card-foreground'}
-            card-shadow
-          `}
-        >
-          <p className="font-sans leading-snug text-center text-card-foreground/90 text-xs sm:text-sm max-h-full overflow-y-auto">
-            {value.definition}
-          </p>
-        </div>
+        {hasDefinition && (
+          <div
+            onClick={handleFlip}
+            className={`
+              absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]
+              flex flex-col items-center justify-center rounded-xl cursor-pointer p-4
+              overflow-hidden
+              ${isPlayer ? 'bg-card-player text-card-foreground' : 'bg-card-npc text-card-foreground'}
+              card-shadow
+            `}
+          >
+            <p className="font-sans leading-snug text-center text-card-foreground/90 text-xs sm:text-sm max-h-full overflow-y-auto">
+              {value.definition}
+            </p>
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );
