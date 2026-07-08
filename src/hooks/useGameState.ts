@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Value, ALL_VALUES } from '../data/values';
 import { ALL_ISSUES } from '../data/issues';
 import {
