@@ -21,8 +21,7 @@ const MeetPartners = ({ partners, partnerProfiles, onContinue }: MeetPartnersPro
           Your Trading Partners
         </h1>
         <p className="text-muted-foreground font-sans">
-          The rest of the deck was dealt to these two. You'll trade with both — here's what each is holding.
-          Each has their own private sense of what these values are worth to them; you'll learn it by trading.
+          The rest of the deck is dealt to the two NPC partners. You must trade at least once with each, but you can make multiple trades until you are satisfied with your hand.
         </p>
       </motion.div>
 
