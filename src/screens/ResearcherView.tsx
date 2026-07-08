@@ -275,11 +275,45 @@ const ResearcherView = ({
 
   const signOut = async () => { await supabase.auth.signOut(); };
 
+  const currentElapsed = now - phaseStartTime;
+  const gated = !session || isResearcher === false;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-start justify-center overflow-y-auto p-4">
       <div className="bg-white text-slate-900 w-full max-w-4xl rounded-xl shadow-2xl my-8">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-xl z-10">
+          <h2 className="text-xs uppercase tracking-[0.2em] font-semibold text-slate-600">
+            Researcher View
+          </h2>
+          <div className="flex items-center gap-2">
+            {session && (
+              <button
+                onClick={signOut}
+                className="text-[10px] uppercase tracking-widest text-slate-500 hover:text-slate-800 border border-slate-200 rounded-full px-2.5 py-1"
+              >Sign out</button>
+            )}
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-lg leading-none"
+              aria-label="Close"
+            >×</button>
+          </div>
+        </div>
+
+        {!authChecked ? (
+          <div className="px-6 py-16 text-center text-xs text-slate-400">Checking access…</div>
+        ) : !session ? (
+          <div className="px-6 py-6"><LoginGate onAuthed={() => { /* handled by listener */ }} /></div>
+        ) : isResearcher === false ? (
+          <div className="px-6 py-10 text-center space-y-3">
+            <p className="text-sm text-slate-700">Signed in as <span className="font-mono">{session.user.email}</span></p>
+            <p className="text-xs text-rose-600">This account does not have the researcher role. Ask the project owner to grant access.</p>
+          </div>
+        ) : isResearcher === null ? (
+          <div className="px-6 py-16 text-center text-xs text-slate-400">Verifying role…</div>
+        ) : (
+        <>
+
           <h2 className="text-xs uppercase tracking-[0.2em] font-semibold text-slate-600">
             Researcher View
           </h2>
