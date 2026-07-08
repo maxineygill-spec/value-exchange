@@ -462,8 +462,11 @@ const ResearcherView = ({
           </>
           )}
         </div>
+        </>
+        )}
       </div>
     </div>
+
   );
 };
 
