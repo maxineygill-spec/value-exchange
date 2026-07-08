@@ -1,54 +1,36 @@
 import { motion } from 'framer-motion';
 
 interface ModeSelectProps {
-  deckSize: 18 | 24;
-  setDeckSize: (size: 18 | 24) => void;
   onStart: () => void;
 }
 
-const ModeSelect = ({ deckSize, setDeckSize, onStart }: ModeSelectProps) => {
+const ModeSelect = ({ onStart }: ModeSelectProps) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-        className="text-center mb-8"
+        className="text-center mb-10 max-w-md"
       >
-        <h1 className="text-4xl sm:text-5xl font-serif font-bold text-foreground mb-2">
-          Value Cards
+        <h1 className="text-4xl sm:text-5xl font-serif font-bold text-foreground mb-3">
+          Value Cards Study
         </h1>
         <p className="text-muted-foreground text-lg font-sans">
-          Discover what matters to you.
+          Welcome. Click below to begin.
         </p>
       </motion.div>
 
       <motion.button
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15, duration: 0.5 }}
-        whileHover={{ y: -4 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        onClick={() => setDeckSize(18)}
-        className={`bg-card-player text-card-foreground rounded-2xl p-6 card-shadow text-left transition-all hover:card-shadow-hover w-full max-w-sm mb-10 ${
-          deckSize === 18 ? 'ring-2 ring-primary' : ''
-        }`}
-      >
-        <div className="text-2xl mb-2">🃏</div>
-        <h2 className="font-serif font-bold text-xl mb-2">18 cards</h2>
-        <p className="text-card-foreground/60 text-sm font-sans">
-          Shorter game, focused choices
-        </p>
-      </motion.button>
-
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
         onClick={onStart}
-        className="px-8 py-4 rounded-xl bg-primary text-primary-foreground font-sans font-semibold hover:opacity-90 transition-opacity"
+        className="px-10 py-5 rounded-xl bg-primary text-primary-foreground font-sans font-semibold text-lg hover:opacity-90 transition-opacity"
       >
-        Start
+        Start Study
       </motion.button>
     </div>
   );
