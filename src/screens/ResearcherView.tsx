@@ -28,7 +28,7 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
 );
 
 const ResearcherView = ({
-  phase, phaseTiming, phaseStartTime, deckSize,
+  phase, phaseTiming, phaseStartTime, condition,
   partners, partnerProfiles, playerHand, dealtPlayerHand, trades, onClose,
 }: ResearcherViewProps) => {
   const [now, setNow] = useState(Date.now());
