@@ -1,4 +1,5 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Value, ALL_VALUES } from '../data/values';
 import { ALL_ISSUES } from '../data/issues';
 import {
@@ -64,12 +65,18 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
   const [phaseStartTime, setPhaseStartTime] = useState<number>(Date.now());
   const [phaseTiming, setPhaseTiming] = useState<Record<string, number>>({});
 
+  const saveSessionRef = useRef<((t: Record<string, number>) => void) | null>(null);
+
   const advancePhase = useCallback((next: GamePhase) => {
     const elapsed = Date.now() - phaseStartTime;
-    setPhaseTiming(prev => ({ ...prev, [phase]: elapsed }));
+    const newTiming = { ...phaseTiming, [phase]: elapsed };
+    setPhaseTiming(newTiming);
     setPhaseStartTime(Date.now());
     setPhase(next);
-  }, [phase, phaseStartTime]);
+    if (next === "summary") {
+      saveSessionRef.current?.(newTiming);
+    }
+  }, [phase, phaseStartTime, phaseTiming]);
 
   const [dealtPlayerHand, setDealtPlayerHand] = useState<Value[]>([]);
   const [playerHand, setPlayerHand] = useState<Value[]>([]);
@@ -169,6 +176,38 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
     },
     [topN]
   );
+
+  const saveSession = useCallback(async (timingOverride?: Record<string, number>) => {
+    const timing = timingOverride ?? phaseTiming;
+    const rankingToList = (r: Ranking) =>
+      Object.entries(r).sort((a, b) => a[1] - b[1]).map(([name]) => name);
+    const payload = {
+      condition,
+      deck_version: condition === "issues" ? "issues-20" : "values-18",
+      dealt_hand: dealtPlayerHand.map(v => v.name),
+      final_hand: playerHand.map(v => v.name),
+      top_selection: finalTop,
+      total_offers: trades.length,
+      successful_trades: trades.filter(t => t.accepted).length,
+      trades: trades as any,
+      timing: timing as any,
+      partner_rankings: partners.map(p => ({ id: p.id, ranking: rankingToList(p.ranking) })) as any,
+      raw: {
+        sessionId: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        timestamp: new Date().toISOString(),
+        condition,
+        dealtHand: dealtPlayerHand.map(v => v.name),
+        finalHand: playerHand.map(v => v.name),
+        topSelection: { n: topN, values: finalTop },
+        trades,
+        timing,
+      } as any,
+    };
+    const { error } = await supabase.from('sessions').insert(payload);
+    if (error) console.error('Failed to save session:', error);
+  }, [condition, dealtPlayerHand, playerHand, finalTop, trades, phaseTiming, partners, topN]);
+
+  saveSessionRef.current = saveSession;
 
   const resetGame = useCallback(() => {
     setPhase("mode-select");
