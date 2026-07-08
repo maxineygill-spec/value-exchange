@@ -7,7 +7,6 @@ import Deal from '../screens/Deal';
 import MeetPartners from '../screens/MeetPartners';
 import Trade from '../screens/Trade';
 import Sort from '../screens/Sort';
-import Debrief from '../screens/Debrief';
 import Summary from '../screens/Summary';
 import ResearcherView from '../screens/ResearcherView';
 
@@ -17,7 +16,6 @@ const PHASE_LABELS: Record<string, string> = {
   "meet-partners": "Your Partners",
   "trade": "Trade",
   "sort": "Prioritize",
-  "debrief": "Reflect",
   "summary": "Summary",
 };
 
@@ -40,15 +38,9 @@ const Index = () => {
   const renderScreen = () => {
     switch (game.phase) {
       case "mode-select":
-        return (
-          <ModeSelect
-            deckSize={game.deckSize}
-            setDeckSize={game.setDeckSize}
-            onStart={() => game.advancePhase("glossary")}
-          />
-        );
+        return <ModeSelect onStart={() => game.startStudy()} />;
       case "glossary":
-        return <Glossary deckSize={game.deckSize} onContinue={() => game.dealCards()} />;
+        return <Glossary condition={game.condition} onContinue={() => game.dealCards()} />;
       case "deal":
         return <Deal playerHand={game.playerHand} onContinue={() => game.advancePhase("meet-partners")} />;
       case "meet-partners":
@@ -74,19 +66,11 @@ const Index = () => {
       case "sort":
         return (
           <Sort
+            condition={game.condition}
             playerHand={game.playerHand}
             topN={game.topN}
             finalTop={game.finalTop}
             toggleTop={game.toggleTop}
-            onContinue={() => game.advancePhase("debrief")}
-          />
-        );
-      case "debrief":
-        return (
-          <Debrief
-            selectableCards={game.finalTop}
-            debriefAnswers={game.debriefAnswers}
-            setDebriefAnswers={game.setDebriefAnswers}
             onContinue={() => game.advancePhase("summary")}
           />
         );
@@ -99,7 +83,6 @@ const Index = () => {
             topN={game.topN}
             partnerProfiles={game.partnerProfiles}
             trades={game.trades}
-            debriefAnswers={game.debriefAnswers}
             onExport={game.exportData}
             onPlayAgain={game.resetGame}
           />
@@ -131,7 +114,7 @@ const Index = () => {
           phase={game.phase}
           phaseTiming={game.phaseTiming}
           phaseStartTime={game.phaseStartTime}
-          deckSize={game.deckSize}
+          condition={game.condition}
           partners={game.partners}
           partnerProfiles={game.partnerProfiles}
           playerHand={game.playerHand}
