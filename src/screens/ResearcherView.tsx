@@ -63,8 +63,8 @@ const ResearcherView = ({
                 <div className="font-mono font-semibold text-primary">{phase}</div>
               </div>
               <div className="bg-slate-50 rounded-lg p-3">
-                <div className="text-[10px] uppercase text-slate-500">Deck size</div>
-                <div className="font-mono font-semibold">{deckSize}</div>
+                <div className="text-[10px] uppercase text-slate-500">Condition</div>
+                <div className="font-mono font-semibold">{condition}</div>
               </div>
               <div className="bg-slate-50 rounded-lg p-3">
                 <div className="text-[10px] uppercase text-slate-500">Time in phase</div>
