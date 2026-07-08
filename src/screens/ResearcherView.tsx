@@ -314,15 +314,6 @@ const ResearcherView = ({
         ) : (
         <>
 
-          <h2 className="text-xs uppercase tracking-[0.2em] font-semibold text-slate-600">
-            Researcher View
-          </h2>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-lg leading-none"
-            aria-label="Close"
-          >×</button>
-        </div>
 
         <div className="px-6 pt-4 border-b border-slate-200 flex gap-1">
           {(['current', 'all'] as const).map(t => (
