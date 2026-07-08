@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Value } from '../data/values';
 import ValueCard from '../components/ValueCard';
+import { Condition } from '../hooks/useGameState';
 
 interface SortProps {
+  condition: Condition;
   playerHand: Value[];
   topN: number;
   finalTop: string[];
@@ -12,9 +14,16 @@ interface SortProps {
 }
 
 const Sort = ({
-  playerHand, finalTop, toggleTop, onContinue,
+  condition, playerHand, finalTop, toggleTop, onContinue,
 }: SortProps) => {
   const [shakeCard, setShakeCard] = useState<string | null>(null);
+
+  const heading = condition === 'issues' ? 'Which issues matter most?' : 'Now, choose your top 3';
+  const sub =
+    condition === 'issues'
+      ? 'From the hand you ended up with after trading, choose your top 3.'
+      : 'From the hand you ended up with after trading, choose the top 3 that matter most.';
+
 
   const handleToggle = (name: string) => {
     if (!finalTop.includes(name) && finalTop.length >= 3) {
