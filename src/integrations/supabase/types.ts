@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      sessions: {
+        Row: {
+          condition: string
+          created_at: string
+          dealt_hand: Json | null
+          deck_version: string | null
+          final_hand: Json | null
+          id: string
+          partner_rankings: Json | null
+          raw: Json | null
+          successful_trades: number | null
+          timing: Json | null
+          top_selection: Json | null
+          total_offers: number | null
+          trades: Json | null
+        }
+        Insert: {
+          condition: string
+          created_at?: string
+          dealt_hand?: Json | null
+          deck_version?: string | null
+          final_hand?: Json | null
+          id?: string
+          partner_rankings?: Json | null
+          raw?: Json | null
+          successful_trades?: number | null
+          timing?: Json | null
+          top_selection?: Json | null
+          total_offers?: number | null
+          trades?: Json | null
+        }
+        Update: {
+          condition?: string
+          created_at?: string
+          dealt_hand?: Json | null
+          deck_version?: string | null
+          final_hand?: Json | null
+          id?: string
+          partner_rankings?: Json | null
+          raw?: Json | null
+          successful_trades?: number | null
+          timing?: Json | null
+          top_selection?: Json | null
+          total_offers?: number | null
+          trades?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
