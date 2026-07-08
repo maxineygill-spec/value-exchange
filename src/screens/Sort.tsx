@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Value } from '../data/values';
 import ValueCard from '../components/ValueCard';
+import { Condition } from '../hooks/useGameState';
 
 interface SortProps {
+  condition: Condition;
   playerHand: Value[];
   topN: number;
   finalTop: string[];
@@ -12,9 +14,16 @@ interface SortProps {
 }
 
 const Sort = ({
-  playerHand, finalTop, toggleTop, onContinue,
+  condition, playerHand, finalTop, toggleTop, onContinue,
 }: SortProps) => {
   const [shakeCard, setShakeCard] = useState<string | null>(null);
+
+  const heading = condition === 'issues' ? 'Which issues matter most?' : 'Now, choose your top 3';
+  const sub =
+    condition === 'issues'
+      ? 'From the hand you ended up with after trading, choose your top 3.'
+      : 'From the hand you ended up with after trading, choose the top 3 that matter most.';
+
 
   const handleToggle = (name: string) => {
     if (!finalTop.includes(name) && finalTop.length >= 3) {
@@ -29,12 +38,13 @@ const Sort = ({
     <div className="min-h-screen flex flex-col items-center px-4 py-12">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8 max-w-lg">
         <h1 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-2">
-          Now, choose your top 3
+          {heading}
         </h1>
         <p className="text-muted-foreground font-sans">
-          From the hand you ended up with after trading, choose the top 3 that matter most.
+          {sub}
         </p>
       </motion.div>
+
 
       <div className="mb-4">
         <span className={`px-4 py-1.5 rounded-full text-sm font-sans tabular-nums ${

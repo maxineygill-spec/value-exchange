@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Value } from '../data/values';
 import { PartnerState, Ranking } from '../lib/tradeEngine';
-import { GamePhase, PartnerDisplay, TradeRecord } from '../hooks/useGameState';
+import { GamePhase, PartnerDisplay, TradeRecord, Condition } from '../hooks/useGameState';
 
 interface ResearcherViewProps {
   phase: GamePhase;
   phaseTiming: Record<string, number>;
   phaseStartTime: number;
-  deckSize: 18 | 24;
+  condition: Condition;
   partners: PartnerState[];
   partnerProfiles: PartnerDisplay[];
   playerHand: Value[];
@@ -28,7 +28,7 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
 );
 
 const ResearcherView = ({
-  phase, phaseTiming, phaseStartTime, deckSize,
+  phase, phaseTiming, phaseStartTime, condition,
   partners, partnerProfiles, playerHand, dealtPlayerHand, trades, onClose,
 }: ResearcherViewProps) => {
   const [now, setNow] = useState(Date.now());
@@ -63,8 +63,8 @@ const ResearcherView = ({
                 <div className="font-mono font-semibold text-primary">{phase}</div>
               </div>
               <div className="bg-slate-50 rounded-lg p-3">
-                <div className="text-[10px] uppercase text-slate-500">Deck size</div>
-                <div className="font-mono font-semibold">{deckSize}</div>
+                <div className="text-[10px] uppercase text-slate-500">Condition</div>
+                <div className="font-mono font-semibold">{condition}</div>
               </div>
               <div className="bg-slate-50 rounded-lg p-3">
                 <div className="text-[10px] uppercase text-slate-500">Time in phase</div>

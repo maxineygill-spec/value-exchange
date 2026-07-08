@@ -1,6 +1,6 @@
 export interface Value {
   name: string;
-  definition: string;
+  definition?: string;
 }
 
 export const ALL_VALUES: Value[] = [

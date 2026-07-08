@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Value, ALL_VALUES } from '../data/values';
+import { ALL_ISSUES } from '../data/issues';
 import {
   PartnerState,
   Ranking,
@@ -23,8 +24,9 @@ export type GamePhase =
   | "meet-partners"
   | "trade"
   | "sort"
-  | "debrief"
   | "summary";
+
+export type Condition = "values" | "issues";
 
 export interface PartnerDisplay {
   id: string;
@@ -45,15 +47,6 @@ export interface TradeRecord {
   accepted: boolean;
 }
 
-export interface DebriefAnswers {
-  hardestToGiveUp: string;
-  whyHardest: string;
-  didMindChange: boolean;
-  whatShifted: string;
-  learnedAboutPartner: string;
-  hiddenCommonGround: string;
-}
-
 export interface OfferOutcome {
   ok: boolean;
   reason?: string;
@@ -62,12 +55,12 @@ export interface OfferOutcome {
 
 const PHASE_ORDER: GamePhase[] = [
   "mode-select", "glossary", "deal", "meet-partners",
-  "trade", "sort", "debrief", "summary",
+  "trade", "sort", "summary",
 ];
 
 export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
   const [phase, setPhase] = useState<GamePhase>("mode-select");
-  const [deckSize, setDeckSize] = useState<18 | 24>(18);
+  const [condition, setCondition] = useState<Condition>("values");
   const [phaseStartTime, setPhaseStartTime] = useState<number>(Date.now());
   const [phaseTiming, setPhaseTiming] = useState<Record<string, number>>({});
 
@@ -85,31 +78,26 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
 
   const [finalTop, setFinalTop] = useState<string[]>([]);
 
-
-  const [debriefAnswers, setDebriefAnswers] = useState<DebriefAnswers>({
-    hardestToGiveUp: "",
-    whyHardest: "",
-    didMindChange: false,
-    whatShifted: "",
-    learnedAboutPartner: "",
-    hiddenCommonGround: "",
-  });
-
   const phaseIndex = PHASE_ORDER.indexOf(phase);
   const totalPhases = PHASE_ORDER.length - 1; // exclude mode-select
 
-  // Spec 1d: top 2 from a hand of 6 (18-deck) / top 3 from a hand of 8 (24-deck).
-  // (Condition 2 prose says a flat "top 3" — to use that, set topN = 3.)
   const topN = 3;
 
   const partnerProfiles = PARTNER_DISPLAY;
 
+  const startStudy = useCallback(() => {
+    const assigned: Condition = Math.random() < 0.5 ? "values" : "issues";
+    setCondition(assigned);
+    advancePhase("glossary");
+  }, [advancePhase]);
+
   const dealCards = useCallback(() => {
-    const pool = deckSize === 18 ? ALL_VALUES.slice(0, 18) : [...ALL_VALUES];
+    const pool: Value[] =
+      condition === "issues"
+        ? (ALL_ISSUES as Value[])
+        : ALL_VALUES.slice(0, 18);
     const [pHand, hA, hB] = dealThreeHands(pool);
 
-    // Each partner gets a private random ranking, guaranteed to leave at least
-    // one acceptable trade against the player's opening hand.
     const rankA: Ranking = buildSolvableRanking(pool, pHand, hA);
     const rankB: Ranking = buildSolvableRanking(pool, pHand, hB);
 
@@ -118,7 +106,7 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
     setPartners([makePartner("A", hA, rankA), makePartner("B", hB, rankB)]);
     setTrades([]);
     setPhase("deal");
-  }, [deckSize]);
+  }, [condition]);
 
   const makeOffer = useCallback(
     (partnerId: string, giveName: string, getName: string): OfferOutcome => {
@@ -191,14 +179,6 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
     setFinalTop([]);
     setPhaseStartTime(Date.now());
     setPhaseTiming({});
-    setDebriefAnswers({
-      hardestToGiveUp: "",
-      whyHardest: "",
-      didMindChange: false,
-      whatShifted: "",
-      learnedAboutPartner: "",
-      hiddenCommonGround: "",
-    });
   }, []);
 
   const exportData = useCallback(() => {
@@ -208,11 +188,10 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
     const data = {
       sessionId: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       timestamp: new Date().toISOString(),
-      condition: "2-trade-and-sort",
-      deckVersion: String(deckSize),
+      condition,
       partners: partners.map((p) => ({
         id: p.id,
-        privateRanking: rankingToList(p.ranking), // most -> least valued
+        privateRanking: rankingToList(p.ranking),
         successfulTrades: p.successes,
         offersReceived: p.offersMade,
       })),
@@ -221,14 +200,6 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
       finalHand: playerHand.map((v) => v.name),
       topSelection: { n: topN, values: finalTop },
       timing: phaseTiming,
-      debrief: {
-        hardestToGiveUp: debriefAnswers.hardestToGiveUp,
-        whyHardest: debriefAnswers.whyHardest,
-        mindChanged: debriefAnswers.didMindChange,
-        whatShifted: debriefAnswers.whatShifted,
-        learnedAboutPartner: debriefAnswers.learnedAboutPartner,
-        hiddenCommonGround: debriefAnswers.hiddenCommonGround,
-      },
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -238,17 +209,16 @@ export const useGameState = (config: TradeConfig = DEFAULT_TRADE_CONFIG) => {
     link.download = `value-cards-session-${Date.now()}.json`;
     link.click();
     URL.revokeObjectURL(url);
-  }, [deckSize, partners, dealtPlayerHand, trades, playerHand, topN, finalTop, debriefAnswers, phaseTiming]);
+  }, [condition, partners, dealtPlayerHand, trades, playerHand, topN, finalTop, phaseTiming]);
 
   return {
     phase, setPhase, advancePhase, phaseIndex, totalPhases,
     phaseTiming, phaseStartTime,
-    deckSize, setDeckSize,
+    condition, startStudy,
     dealtPlayerHand, playerHand,
     partners, partnerProfiles, partnerMaxedOut,
     trades,
     topN, finalTop, toggleTop,
-    debriefAnswers, setDebriefAnswers,
     dealCards, makeOffer, canFinishTrading,
     resetGame, exportData,
   };
