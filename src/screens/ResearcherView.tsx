@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Value } from '../data/values';
 import { PartnerState, Ranking } from '../lib/tradeEngine';
