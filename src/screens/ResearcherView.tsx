@@ -184,18 +184,97 @@ const AllSessionsTab = () => {
   );
 };
 
+const LoginGate = ({ onAuthed }: { onAuthed: () => void }) => {
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setErr(null);
+    const fn = mode === 'signin'
+      ? supabase.auth.signInWithPassword({ email, password })
+      : supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/` } });
+    const { error } = await fn;
+    setBusy(false);
+    if (error) { setErr(error.message); return; }
+    onAuthed();
+  };
+
+  return (
+    <form onSubmit={submit} className="space-y-4 max-w-sm mx-auto py-4">
+      <div>
+        <h3 className="text-base font-semibold text-slate-900 mb-1">Researcher sign-in required</h3>
+        <p className="text-xs text-slate-500">Only accounts granted the researcher role can view session data.</p>
+      </div>
+      <div className="space-y-2">
+        <input
+          type="email" required value={email} onChange={e => setEmail(e.target.value)}
+          placeholder="Email"
+          className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+        />
+        <input
+          type="password" required minLength={8} value={password} onChange={e => setPassword(e.target.value)}
+          placeholder="Password (min 8 chars)"
+          className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+        />
+      </div>
+      {err && <p className="text-xs text-rose-600">{err}</p>}
+      <button
+        type="submit" disabled={busy}
+        className="w-full bg-primary text-primary-foreground rounded px-3 py-2 text-sm font-medium disabled:opacity-50"
+      >{busy ? '…' : mode === 'signin' ? 'Sign in' : 'Create account'}</button>
+      <button
+        type="button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setErr(null); }}
+        className="w-full text-xs text-slate-500 hover:text-slate-800"
+      >{mode === 'signin' ? "Need an account? Sign up" : 'Have an account? Sign in'}</button>
+    </form>
+  );
+};
+
 const ResearcherView = ({
   phase, phaseTiming, phaseStartTime, condition,
   partners, partnerProfiles, playerHand, dealtPlayerHand, trades, onClose,
 }: ResearcherViewProps) => {
   const [now, setNow] = useState(Date.now());
   const [tab, setTab] = useState<'current' | 'all'>('current');
+  const [session, setSession] = useState<Session | null>(null);
+  const [isResearcher, setIsResearcher] = useState<boolean | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  const currentElapsed = now - phaseStartTime;
+  const checkRole = useCallback(async (userId: string) => {
+    const { data } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'researcher')
+      .maybeSingle();
+    setIsResearcher(!!data);
+  }, []);
+
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_evt, s) => {
+      setSession(s);
+      if (s?.user) checkRole(s.user.id); else setIsResearcher(null);
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      if (data.session?.user) checkRole(data.session.user.id);
+      setAuthChecked(true);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [checkRole]);
+
+  const signOut = async () => { await supabase.auth.signOut(); };
+
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-start justify-center overflow-y-auto p-4">
