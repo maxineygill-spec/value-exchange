@@ -15,6 +15,11 @@ export interface NPCType {
   };
 }
 
+export const DEFAULT_RESPONSES = {
+  accept: "Yes! {offeredCard} means more to me than {wantedCard} — I'll take this trade.",
+  decline: "No — {wantedCard} still means more to me than {offeredCard}, so I'll pass on this one.",
+};
+
 export const NPC_TYPES: NPCType[] = [
   {
     id: "idealist",
