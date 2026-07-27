@@ -4,6 +4,8 @@ import { Value } from '../data/values';
 import { PartnerState } from '../lib/tradeEngine';
 import { PartnerDisplay, OfferOutcome } from '../hooks/useGameState';
 import ValueCard from '../components/ValueCard';
+import NpcSpeechBubble from '../components/NpcSpeechBubble';
+import { NPC_TYPES, DEFAULT_RESPONSES } from '../data/npcs';
 
 interface TradeProps {
   playerHand: Value[];
@@ -15,6 +17,8 @@ interface TradeProps {
   onContinue: () => void;
 }
 
+const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
 const Trade = ({
   playerHand, partners, partnerProfiles, makeOffer, canFinishTrading, partnerMaxedOut, onContinue,
 }: TradeProps) => {
@@ -22,7 +26,7 @@ const Trade = ({
   const [give, setGive] = useState<string | null>(null);
   const [get, setGet] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<{ accepted: boolean } | null>(null);
+  const [result, setResult] = useState<{ accepted: boolean; dialogue: string; npcName: string; npcAvatar: string } | null>(null);
 
   const activeIdx = partners.findIndex((p) => p.id === activeId);
   const partner = partners[activeIdx];
@@ -58,9 +62,19 @@ const Trade = ({
       setError(outcome.reason ?? "That trade isn't allowed.");
       return;
     }
-    setResult({ accepted: !!outcome.accepted });
+    const accepted = !!outcome.accepted;
+    // Map partner id to an NPC profile deterministically
+    const npcIdx = partners.findIndex((p) => p.id === activeId);
+    const npc = NPC_TYPES[npcIdx % NPC_TYPES.length];
+    const pool = accepted
+      ? [...npc.responses.acceptLow, DEFAULT_RESPONSES.accept]
+      : [...npc.responses.declineHigh, DEFAULT_RESPONSES.decline];
+    const dialogue = pick(pool)
+      .replace(/\{offeredCard\}/g, give)
+      .replace(/\{wantedCard\}/g, get);
+    setResult({ accepted, dialogue, npcName: npc.name, npcAvatar: npc.avatar });
     setGet(null);
-    if (outcome.accepted) setGive(null);
+    if (accepted) setGive(null);
   };
 
   return (
@@ -126,13 +140,23 @@ const Trade = ({
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className={`rounded-xl px-5 py-3 text-center font-sans text-sm font-semibold border ${
-                    result.accepted
-                      ? 'bg-primary/10 border-primary/30 text-primary'
-                      : 'bg-muted border-border text-muted-foreground'
-                  }`}
+                  className="space-y-3"
                 >
-                  {result.accepted ? "✓ Trade accepted" : "✗ Declined"}
+                  <div
+                    className={`rounded-xl px-5 py-2 text-center font-sans text-xs font-semibold border ${
+                      result.accepted
+                        ? 'bg-primary/10 border-primary/30 text-primary'
+                        : 'bg-muted border-border text-muted-foreground'
+                    }`}
+                  >
+                    {result.accepted ? "✓ Trade accepted" : "✗ Declined"}
+                  </div>
+                  <NpcSpeechBubble
+                    avatar={result.npcAvatar}
+                    name={result.npcName}
+                    dialogue={result.dialogue}
+                    isRefusal={!result.accepted}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
