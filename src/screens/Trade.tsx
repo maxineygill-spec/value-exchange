@@ -140,13 +140,23 @@ const Trade = ({
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className={`rounded-xl px-5 py-3 text-center font-sans text-sm font-semibold border ${
-                    result.accepted
-                      ? 'bg-primary/10 border-primary/30 text-primary'
-                      : 'bg-muted border-border text-muted-foreground'
-                  }`}
+                  className="space-y-3"
                 >
-                  {result.accepted ? "✓ Trade accepted" : "✗ Declined"}
+                  <div
+                    className={`rounded-xl px-5 py-2 text-center font-sans text-xs font-semibold border ${
+                      result.accepted
+                        ? 'bg-primary/10 border-primary/30 text-primary'
+                        : 'bg-muted border-border text-muted-foreground'
+                    }`}
+                  >
+                    {result.accepted ? "✓ Trade accepted" : "✗ Declined"}
+                  </div>
+                  <NpcSpeechBubble
+                    avatar={result.npcAvatar}
+                    name={result.npcName}
+                    dialogue={result.dialogue}
+                    isRefusal={!result.accepted}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
