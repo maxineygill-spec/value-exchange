@@ -62,9 +62,19 @@ const Trade = ({
       setError(outcome.reason ?? "That trade isn't allowed.");
       return;
     }
-    setResult({ accepted: !!outcome.accepted });
+    const accepted = !!outcome.accepted;
+    // Map partner id to an NPC profile deterministically
+    const npcIdx = partners.findIndex((p) => p.id === activeId);
+    const npc = NPC_TYPES[npcIdx % NPC_TYPES.length];
+    const pool = accepted
+      ? [...npc.responses.acceptLow, DEFAULT_RESPONSES.accept]
+      : [...npc.responses.declineHigh, DEFAULT_RESPONSES.decline];
+    const dialogue = pick(pool)
+      .replace(/\{offeredCard\}/g, give)
+      .replace(/\{wantedCard\}/g, get);
+    setResult({ accepted, dialogue, npcName: npc.name, npcAvatar: npc.avatar });
     setGet(null);
-    if (outcome.accepted) setGive(null);
+    if (accepted) setGive(null);
   };
 
   return (
