@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.grant_researcher_for_allowlist() FROM PUBLIC, anon, authenticated;
