@@ -4,6 +4,8 @@ import { Value } from '../data/values';
 import { PartnerState } from '../lib/tradeEngine';
 import { PartnerDisplay, OfferOutcome } from '../hooks/useGameState';
 import ValueCard from '../components/ValueCard';
+import NpcSpeechBubble from '../components/NpcSpeechBubble';
+import { NPC_TYPES, DEFAULT_RESPONSES } from '../data/npcs';
 
 interface TradeProps {
   playerHand: Value[];
@@ -15,6 +17,8 @@ interface TradeProps {
   onContinue: () => void;
 }
 
+const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
 const Trade = ({
   playerHand, partners, partnerProfiles, makeOffer, canFinishTrading, partnerMaxedOut, onContinue,
 }: TradeProps) => {
@@ -22,7 +26,7 @@ const Trade = ({
   const [give, setGive] = useState<string | null>(null);
   const [get, setGet] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<{ accepted: boolean } | null>(null);
+  const [result, setResult] = useState<{ accepted: boolean; dialogue: string; npcName: string; npcAvatar: string } | null>(null);
 
   const activeIdx = partners.findIndex((p) => p.id === activeId);
   const partner = partners[activeIdx];
