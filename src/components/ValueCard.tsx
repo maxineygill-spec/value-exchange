@@ -39,9 +39,9 @@ const ValueCard = ({
   };
 
   const titleSize = {
-    sm: 'text-sm sm:text-base',
-    md: 'text-base sm:text-lg',
-    lg: 'text-lg sm:text-xl',
+    sm: 'text-base sm:text-lg',
+    md: 'text-lg sm:text-xl',
+    lg: 'text-xl sm:text-2xl',
   };
 
   if (isFaceDown) {
